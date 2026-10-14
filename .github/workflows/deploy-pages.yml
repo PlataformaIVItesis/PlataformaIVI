@@ -35,7 +35,7 @@ jobs:
       - name: Build React app
         working-directory: frontend
         env:
-          REACT_APP_API_URL: ${{ vars.BACKEND_API_URL }}
+          REACT_APP_API_URL: https://dangzamer1.pythonanywhere.com/api
         run: |
           test -n "$REACT_APP_API_URL"
           npm run build
