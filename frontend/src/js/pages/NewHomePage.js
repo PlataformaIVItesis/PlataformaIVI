@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import "../../css/pages/HomePage.css";
-import logo from "../../images/logoNuevoSF.png";
+const logo = `${process.env.PUBLIC_URL}/images/LogoInSF.png`;
 
 export default function HomePage() {
   const navigate = useNavigate();

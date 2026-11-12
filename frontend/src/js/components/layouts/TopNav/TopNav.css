@@ -723,13 +723,20 @@
   flex: 0 0 auto;
 }
 
-.topnav-brand .brand-logo,
 .topnav-brand .brand-text p {
   display: none;
 }
 
 .brand-link {
   gap: 0;
+}
+
+.topnav-brand .brand-logo {
+  display: block;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
 }
 
 .topnav-brand h1 {

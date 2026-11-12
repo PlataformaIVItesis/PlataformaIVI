@@ -1,8 +1,9 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AccessibilityContext } from "../../../context/AccessibilityContext";
-import logo from "../../../../images/logoNuevoSF.png";
 import "./TopNav.css";
+
+const logo = `${process.env.PUBLIC_URL}/images/LogoInSF.png`;
 
 export default function TopNav() {
   const [showWarning, setShowWarning] = useState(true);
@@ -115,12 +116,8 @@ export default function TopNav() {
               <img
                 className="brand-logo"
                 src={logo}
-                alt="IVI"
+                alt="Logo de IVI"
               />
-              <div className="brand-text">
-                <h1>IVI</h1>
-                <p>Plataforma de Apoyo y Tamizaje Disléxico</p>
-              </div>
             </Link>
           </div>
 
