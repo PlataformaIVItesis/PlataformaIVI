@@ -1077,14 +1077,26 @@
   }
 
   .topnav-primary {
-    display: flex;
+    display: block;
+    position: relative;
     width: 100%;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.25rem;
+    padding-top: 0;
   }
 
-  .topnav-brand { align-self: flex-start; }
+  /* Keep the brand on the same first row as the main navigation on phones. */
+  .topnav-brand {
+    position: absolute;
+    top: 0.05rem;
+    left: 0;
+    z-index: 1;
+  }
+
+  .topnav-brand .brand-logo {
+    width: 2.25rem;
+    height: 2.25rem;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+  }
 
   .topnav-primary .primary-menu {
     display: flex !important;
@@ -1103,6 +1115,12 @@
     align-items: center;
     justify-content: flex-start;
     gap: 0.15rem;
+  }
+
+  .primary-links-row {
+    box-sizing: border-box;
+    min-height: 2.4rem;
+    padding-left: 2.75rem;
   }
 
   .primary-links-row .nav-link,
