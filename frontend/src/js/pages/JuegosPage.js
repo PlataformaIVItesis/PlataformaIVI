@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { getOfficePatient } from "../services/api";
 import cerebro from "../../images/juegos/cerebro.svg";
 import juego from "../../images/juegos/juego.svg";
 import libros from "../../images/juegos/libros.svg";
@@ -28,7 +29,7 @@ const edades = [
 ];
 
 const getStoredAge = () => {
-  const officePatient = JSON.parse(localStorage.getItem("ivi_office_patient") || "null");
+  const officePatient = getOfficePatient();
   const storedUser = JSON.parse(localStorage.getItem("user") || localStorage.getItem("ivi_user") || "null");
   const age = Number(officePatient?.age ?? storedUser?.age ?? 0);
   if (age >= 5 && age <= 7) return "5-7";

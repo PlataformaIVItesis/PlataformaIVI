@@ -299,12 +299,14 @@ def signup_view(request):
         elif requested_role != 'professional':
             return Response({'field_errors': {'age': 'La edad es obligatoria para pacientes'}}, status=status.HTTP_400_BAD_REQUEST)
 
-        if requested_role == 'professional' and (not license_number or not specialty):
+        if requested_role == 'professional' and (not license_number or not specialty or not institution.strip()):
             professional_errors = {}
             if not license_number:
                 professional_errors['license_number'] = 'La matrícula profesional es obligatoria'
             if not specialty:
                 professional_errors['specialty'] = 'La especialidad es obligatoria'
+            if not institution.strip():
+                professional_errors['institution'] = 'El consultorio o institucion es obligatorio'
             return Response({'field_errors': professional_errors}, status=status.HTTP_400_BAD_REQUEST)
 
         # Crear usuario
@@ -385,22 +387,25 @@ def doctor_view(request):
     date_from_r = request.GET.get('date_from', '').strip()
     date_to_r = request.GET.get('date_to', '').strip()
     office_only = request.GET.get('office', '').strip().lower() in ('1', 'true', 'yes')
+    assigned_patients = Paciente.objects.all() if role == 'admin' else Paciente.objects.filter(consultorio_doctor=user)
 
     pacientes = []
     if ci:
-        pacientes = [p.profile.user for p in Paciente.objects.filter(ci=ci).select_related('profile__user')]
+        pacientes = [p.profile.user for p in assigned_patients.filter(ci=ci).select_related('profile__user')]
     elif name:
         # Buscar por username o por nombre completo
         usuarios = User.objects.filter(username__icontains=name) | User.objects.filter(first_name__icontains=name) | User.objects.filter(last_name__icontains=name)
-        pacientes = list(usuarios.distinct())
+        pacientes = list(usuarios.filter(id__in=assigned_patients.values_list('profile__user_id', flat=True)).distinct())
     else:
         # Si no se especifica name ni ci, devolver un preview: últimos resultados por paciente
         preview = []
-        perfiles = Profile.objects.filter(role='paciente').select_related('user')
+        perfiles = Profile.objects.filter(role='paciente', user_id__in=assigned_patients.values_list('profile__user_id', flat=True)).select_related('user', 'paciente__consultorio_doctor')
         if office_only:
             perfiles = perfiles.filter(is_office_patient=True)
         for p in perfiles:
             paciente = p.user
+            doctor = p.paciente.consultorio_doctor
+            doctor_name = (doctor.get_full_name().strip() or doctor.username) if doctor else (user.get_full_name().strip() or user.username)
             res_qs = ResultadoPrueba.objects.filter(paciente__profile__user=paciente).order_by('-fecha_prueba')[:3]
             last_results = []
             tipo_acc = {}
@@ -419,7 +424,10 @@ def doctor_view(request):
             preview.append({
                 'paciente_id': paciente.id,
                 'paciente_username': paciente.username,
+                'paciente_nombre': paciente.get_full_name().strip() or paciente.username,
+                'paciente_edad': p.age,
                 'paciente_ci': p.ci,
+                'doctor_nombre': doctor_name,
                 'last_results': last_results,
                 'averages': averages,
                 'recent_count': ResultadoPrueba.objects.filter(paciente__profile__user=paciente).count()
@@ -432,6 +440,9 @@ def doctor_view(request):
         pacientes = [paciente for paciente in pacientes if paciente.id in office_ids]
     resultados = []
     for paciente in pacientes:
+        patient_record = Paciente.objects.filter(profile__user=paciente).select_related('consultorio_doctor').first()
+        doctor = patient_record.consultorio_doctor if patient_record else None
+        doctor_name = (doctor.get_full_name().strip() or doctor.username) if doctor else (user.get_full_name().strip() or user.username)
         res = ResultadoPrueba.objects.filter(paciente__profile__user=paciente)
         if tipo_prueba:
             res = res.filter(prueba__codigo=tipo_prueba)
@@ -449,7 +460,10 @@ def doctor_view(request):
             resultados.append({
                 "paciente_id": paciente.id,
                 "paciente_username": paciente.username,
+                "paciente_nombre": paciente.get_full_name().strip() or paciente.username,
+                "paciente_edad": getattr(paciente.profile, 'age', None),
                 "paciente_ci": getattr(paciente.profile, 'ci', None),
+                "doctor_nombre": doctor_name,
                 "resultado_id": r.id,
                 "tipo_prueba": r.tipo_prueba,
                 "tipo_prueba_display": r.get_tipo_prueba_display(),
@@ -459,6 +473,38 @@ def doctor_view(request):
             })
 
     return Response(resultados, status=status.HTTP_200_OK)
+
+
+@api_view(['DELETE'])
+def doctor_patient_results_view(request, patient_id):
+    """Elimina los resultados de un paciente asignado al doctor autenticado."""
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return Response({'error': 'Token no proporcionado'}, status=status.HTTP_401_UNAUTHORIZED)
+    doctor = get_user_from_token(auth_header.replace('Bearer ', ''))
+    if not doctor:
+        return Response({'error': 'Token inválido'}, status=status.HTTP_401_UNAUTHORIZED)
+    try:
+        role = doctor.profile.role
+    except Exception:
+        role = 'paciente'
+    if role not in ('doctor', 'admin'):
+        return Response({'error': 'Se requiere rol doctor'}, status=status.HTTP_403_FORBIDDEN)
+
+    patient_query = Paciente.objects.filter(profile__user_id=patient_id)
+    if role != 'admin':
+        patient_query = patient_query.filter(consultorio_doctor=doctor)
+    patient = patient_query.first()
+    if not patient:
+        return Response({'error': 'Paciente no encontrado en este consultorio.'}, status=status.HTTP_404_NOT_FOUND)
+
+    deleted_count = ResultadoPrueba.objects.filter(paciente=patient).count()
+    patient.profile.user.delete()
+    return Response({
+        'message': 'Paciente y resultados eliminados.',
+        'deleted_results': deleted_count,
+        'patient_deleted': True,
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -488,6 +534,8 @@ def doctor_consultorio_view(request):
 
     patient_record = Paciente.objects.filter(ci=ci).select_related('profile__user').first()
     if patient_record:
+        if doctor.profile.role != 'admin' and patient_record.consultorio_doctor_id not in (None, doctor.id):
+            return Response({'error': 'Este paciente ya está asignado a otro consultorio.'}, status=status.HTTP_403_FORBIDDEN)
         patient = patient_record.profile.user
         profile = patient_record.profile
     else:
@@ -503,6 +551,13 @@ def doctor_consultorio_view(request):
         profile = patient.profile
         profile.role = 'paciente'
         profile.ci = ci
+        patient_record = profile.paciente
+    if doctor.profile.role == 'doctor':
+        patient_record.consultorio_doctor = doctor
+        patient_record.save(update_fields=['consultorio_doctor'])
+    if patient.first_name != name:
+        patient.first_name = name
+        patient.save(update_fields=['first_name'])
     profile.is_office_patient = True
     profile.age = age
     profile.save()
@@ -557,7 +612,7 @@ def admin_users_view(request):
                 # Unicidad de CI
                 if Paciente.objects.filter(ci=ci_new).exists():
                     return Response({'error': 'CI ya registrado para otro usuario'}, status=status.HTTP_400_BAD_REQUEST)
-            if role_new == 'doctor' and (not license_number_new or not specialty_new):
+            if role_new == 'doctor' and (not license_number_new or not specialty_new or not institution_new):
                 return Response({'error': 'Matrícula profesional y especialidad son obligatorias para doctores'}, status=status.HTTP_400_BAD_REQUEST)
 
             user_new = User.objects.create(username=username, email=email, first_name=first_name, last_name=last_name, is_staff=is_staff_flag, is_superuser=is_superuser_flag)
@@ -824,7 +879,7 @@ def admin_user_detail_view(request, user_id):
                 prof.specialty = (data.get('specialty') or '').strip()
             if 'institution' in data:
                 prof.institution = (data.get('institution') or '').strip()
-            if prof.role == 'doctor' and (not prof.license_number or not prof.specialty):
+            if prof.role == 'doctor' and (not prof.license_number or not prof.specialty or not prof.institution):
                 return Response({'error': 'Matrícula profesional y especialidad son obligatorias para doctores'}, status=status.HTTP_400_BAD_REQUEST)
             if prof.role != 'doctor':
                 prof.license_number = ''

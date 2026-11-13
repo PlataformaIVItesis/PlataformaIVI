@@ -1,4 +1,4 @@
-import { apiUrl } from "../services/api";
+import { apiUrl, getOfficePatient } from "../services/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/pages/PruebaPage.css";
@@ -18,6 +18,7 @@ export default function PruebaVelocidadPage() {
   const [corriendo, setCorriendo] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [mostrarResultados, setMostrarResultados] = useState(false);
+  const [errorGuardado, setErrorGuardado] = useState("");
 
   useEffect(() => {
     if (!corriendo) return;
@@ -43,6 +44,7 @@ export default function PruebaVelocidadPage() {
     const velocidad = calcularVelocidad();
     
     setGuardando(true);
+    setErrorGuardado("");
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(apiUrl('/resultados/'), {
@@ -59,15 +61,17 @@ export default function PruebaVelocidadPage() {
             palabras_leidas: palabrasLeidas,
             velocidad_ppm: velocidad
           },
-          target_user_id: JSON.parse(localStorage.getItem("ivi_office_patient") || "null")?.id
+          target_user_id: getOfficePatient()?.id
         }),
       });
 
+      const data = await response.json().catch(() => ({}));
       if (response.ok) {
         setMostrarResultados(true);
-      }
+      } else setErrorGuardado(data.error || data.detail || "No se pudo guardar el resultado. Intenta de nuevo.");
     } catch (error) {
       console.error("Error al guardar resultado:", error);
+      setErrorGuardado("No se pudo conectar con el servidor para guardar el resultado.");
     } finally {
       setGuardando(false);
     }
@@ -149,12 +153,13 @@ export default function PruebaVelocidadPage() {
           </div>
 
           <div className="prueba-actions">
+            {errorGuardado && <div className="error-message" role="alert">{errorGuardado}</div>}
             <button
               onClick={handleDetener}
               disabled={guardando}
               className="btn-detener"
             >
-              {guardando ? "Guardando..." : "Detener y Enviar"}
+              {guardando ? "Guardando..." : "Detener y guardar resultados"}
             </button>
           </div>
         </div>

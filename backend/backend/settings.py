@@ -145,6 +145,11 @@ CORS_ALLOWED_ORIGINS = [
     if origin.strip()
 ]
 CORS_ALLOWED_ORIGINS.append('https://plataformaivitesis.github.io')
+if DEBUG:
+    CORS_ALLOWED_ORIGINS.extend([
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+    ])
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')

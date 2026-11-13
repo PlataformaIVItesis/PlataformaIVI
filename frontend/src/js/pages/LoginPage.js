@@ -40,6 +40,9 @@ export default function LoginPage() {
 
       // Determinar el rol real devuelto por la API o el seleccionado
       const userRole = data.user?.role || selectedRole;
+      if (userRole !== "doctor" && userRole !== "admin") {
+        localStorage.removeItem("ivi_office_patient");
+      }
 
       if (userRole === "admin") {
         navigate("/admin/users");

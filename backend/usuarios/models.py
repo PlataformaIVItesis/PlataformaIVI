@@ -188,6 +188,7 @@ class Profile(models.Model):
 
 class Paciente(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name='paciente')
+    consultorio_doctor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='pacientes_consultorio')
     ci = models.CharField(max_length=64, unique=True, null=True, blank=True, help_text='Identificador único del paciente')
     age = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name='Edad')
     is_office_patient = models.BooleanField(default=False, verbose_name='Paciente en consultorio')

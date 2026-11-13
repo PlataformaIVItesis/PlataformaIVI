@@ -236,7 +236,7 @@ export default function AdminUsers() {
             {fieldErrors.ci && <div className="field-error">{fieldErrors.ci}</div>}
             <label>Matrícula profesional: <input value={editing.license_number||''} onChange={e=>setEditing({...editing, license_number: e.target.value})} /></label>
             <label>Especialidad: <input value={editing.specialty||''} onChange={e=>setEditing({...editing, specialty: e.target.value})} /></label>
-            <label>Institución: <input value={editing.institution||''} onChange={e=>setEditing({...editing, institution: e.target.value})} /></label>
+            <label>Consultorio o institución: <input required={editing.role==='doctor'} value={editing.institution||''} onChange={e=>setEditing({...editing, institution: e.target.value})} /></label>
             <label>Contraseña (dejar vacío para no cambiar): <input type="password" value={editing.password||''} onChange={e=>setEditing({...editing, password: e.target.value})} /></label>
             {fieldErrors.password && <div className="field-error">{fieldErrors.password}</div>}
             <div style={{marginTop: '1rem'}}>

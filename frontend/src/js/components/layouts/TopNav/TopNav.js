@@ -87,6 +87,7 @@ export default function TopNav() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("ivi_office_patient");
     navigate("/");
   };
 

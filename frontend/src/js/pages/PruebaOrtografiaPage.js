@@ -1,4 +1,4 @@
-import { apiUrl } from "../services/api";
+import { apiUrl, getOfficePatient } from "../services/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/pages/PruebaPage.css";
@@ -56,11 +56,21 @@ const PALABRAS_ORTOGRAFIA = [
 
 export default function PruebaOrtografiaPage() {
   const navigate = useNavigate();
-  const [tiempoInicio] = useState(Date.now());
+  const [tiempoInicio, setTiempoInicio] = useState(Date.now());
   const [indiceActual, setIndiceActual] = useState(0);
   const [respuestas, setRespuestas] = useState({});
   const [mostrarResultados, setMostrarResultados] = useState(false);
   const [guardando, setGuardando] = useState(false);
+  const [errorGuardado, setErrorGuardado] = useState("");
+
+  const reiniciar = () => {
+    setIndiceActual(0);
+    setRespuestas({});
+    setMostrarResultados(false);
+    setGuardando(false);
+    setErrorGuardado("");
+    setTiempoInicio(Date.now());
+  };
 
   const palabraActual = PALABRAS_ORTOGRAFIA[indiceActual];
   const todasRespondidas = Object.keys(respuestas).length === PALABRAS_ORTOGRAFIA.length;
@@ -111,6 +121,7 @@ export default function PruebaOrtografiaPage() {
     }));
     
     setGuardando(true);
+    setErrorGuardado("");
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(apiUrl('/resultados/'), {
@@ -128,15 +139,17 @@ export default function PruebaOrtografiaPage() {
             total_preguntas: PALABRAS_ORTOGRAFIA.length,
             respuestas: respuestasDetalladas
           },
-          target_user_id: JSON.parse(localStorage.getItem("ivi_office_patient") || "null")?.id
+          target_user_id: getOfficePatient()?.id
         }),
       });
 
+      const data = await response.json().catch(() => ({}));
       if (response.ok) {
         setMostrarResultados(true);
-      }
+      } else setErrorGuardado(data.error || data.detail || "No se pudo guardar el resultado. Intenta de nuevo.");
     } catch (error) {
       console.error("Error al guardar resultado:", error);
+      setErrorGuardado("No se pudo conectar con el servidor para guardar el resultado.");
     } finally {
       setGuardando(false);
     }
@@ -172,6 +185,7 @@ export default function PruebaOrtografiaPage() {
           <button onClick={() => navigate("/pruebas")} className="btn-volver">
             Volver a pruebas
           </button>
+          <button onClick={reiniciar} className="btn-volver">Reiniciar prueba</button>
         </div>
       </div>
     );
@@ -211,6 +225,9 @@ export default function PruebaOrtografiaPage() {
           </div>
 
           <div className="prueba-actions">
+            {errorGuardado && <div className="error-message" role="alert">{errorGuardado}</div>}
+            <button onClick={reiniciar} className="btn-volver">Reiniciar prueba</button>
+            <button onClick={() => navigate("/pruebas")} className="btn-volver">Volver a pruebas</button>
             {!todasRespondidas ? (
               <>
                 <button onClick={handleAnterior} disabled={indiceActual === 0} className="btn-anterior">
@@ -222,7 +239,7 @@ export default function PruebaOrtografiaPage() {
               </>
             ) : (
               <button onClick={handleSubmit} disabled={guardando} className="btn-submit">
-                {guardando ? "Guardando..." : "✓ Enviar Respuestas"}
+                {guardando ? "Guardando..." : "Guardar resultados"}
               </button>
             )}
           </div>

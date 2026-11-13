@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { getOfficePatient } from "../services/api";
 import "../../css/pages/PruebasPage.css";
 
 const cuestionarios = [
@@ -10,7 +11,7 @@ const cuestionarios = [
 
 export default function PruebasPage() {
   const navigate = useNavigate();
-  const officePatient = JSON.parse(localStorage.getItem("ivi_office_patient") || "null");
+  const officePatient = getOfficePatient();
 
   return (
     <div className="pruebas-page">

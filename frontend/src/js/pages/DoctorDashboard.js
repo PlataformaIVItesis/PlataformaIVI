@@ -20,6 +20,8 @@ export default function DoctorDashboard(){
   const [officeError, setOfficeError] = useState('');
   const [showOfficeResults, setShowOfficeResults] = useState(false);
   const [officeResults, setOfficeResults] = useState([]);
+  const [deletingPatient, setDeletingPatient] = useState(null);
+  const [deleteMessage, setDeleteMessage] = useState('');
 
   const token = localStorage.getItem('token');
 
@@ -29,7 +31,7 @@ export default function DoctorDashboard(){
       const res = await fetch(apiUrl('/doctor/' ), { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) { const d = await res.json().catch(()=>({})); setError(d.error||'Error'); setLoading(false); return; }
       const data = await res.json();
-      setResults(data.map(p=>({ paciente_id: p.paciente_id, paciente_username: p.paciente_username, paciente_ci: p.paciente_ci, preview: p })));
+      setResults(data.map(p=>({ paciente_id: p.paciente_id, paciente_username: p.paciente_username, paciente_nombre: p.paciente_nombre, paciente_edad: p.paciente_edad, doctor_nombre: p.doctor_nombre, paciente_ci: p.paciente_ci, preview: p })));
     } catch(e){ setError('Error de conexión'); }
     setLoading(false);
   }, [token]);
@@ -67,7 +69,7 @@ export default function DoctorDashboard(){
       const map = {};
       data.forEach(r => {
         const pid = r.paciente_id || r.paciente_username || 'unknown';
-        if (!map[pid]) map[pid] = { paciente_id: r.paciente_id, paciente_username: r.paciente_username, paciente_ci: r.paciente_ci, resultados: [] };
+        if (!map[pid]) map[pid] = { paciente_id: r.paciente_id, paciente_username: r.paciente_username, paciente_nombre: r.paciente_nombre, paciente_edad: r.paciente_edad, doctor_nombre: r.doctor_nombre, paciente_ci: r.paciente_ci, resultados: [] };
         map[pid].resultados.push(r);
       });
       setResults(Object.values(map));
@@ -79,6 +81,28 @@ export default function DoctorDashboard(){
     if (!ci) return;
     navigate(`/doctor/patient/${encodeURIComponent(ci)}`);
   }
+
+  const deletePatientResults = async (patient) => {
+    const patientName = patient.paciente_nombre || patient.paciente_username || 'este paciente';
+    if (!window.confirm(`¿Eliminar el registro de ${patientName} y todos sus resultados? Esta acción no se puede deshacer.`)) return;
+    setDeletingPatient(patient.paciente_id);
+    setDeleteMessage('');
+    try {
+      const response = await fetch(apiUrl(`/doctor/patients/${patient.paciente_id}/results/`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'No se pudieron eliminar los resultados.');
+      setResults(current => current.filter(item => item.paciente_id !== patient.paciente_id));
+      setOfficeResults(current => current.filter(item => item.paciente_id !== patient.paciente_id));
+      setDeleteMessage(`Se eliminó el registro de ${patientName} y ${data.deleted_results || 0} resultados.`);
+    } catch (err) {
+      setDeleteMessage(err.message || 'No se pudieron eliminar los resultados.');
+    } finally {
+      setDeletingPatient(null);
+    }
+  };
 
   const beginOfficeTest = async () => {
     setOfficeError('');
@@ -129,7 +153,7 @@ export default function DoctorDashboard(){
       const response = await fetch(apiUrl('/doctor/?office=1'), { headers: { Authorization: `Bearer ${token}` } });
       if (!response.ok) return;
       const data = await response.json();
-      setOfficeResults(data.map(p => ({ paciente_id: p.paciente_id, paciente_username: p.paciente_username, paciente_ci: p.paciente_ci, preview: p })));
+      setOfficeResults(data.map(p => ({ paciente_id: p.paciente_id, paciente_username: p.paciente_username, paciente_nombre: p.paciente_nombre, paciente_edad: p.paciente_edad, doctor_nombre: p.doctor_nombre, paciente_ci: p.paciente_ci, preview: p })));
     } catch (e) {
       setError('No se pudieron cargar los resultados de consultorio.');
     }
@@ -149,12 +173,12 @@ export default function DoctorDashboard(){
 
   return (
     <div className="doctor-page container">
-      <h2>Panel Doctor - Resultados de Pacientes</h2>
+      <h2>Panel Doctor - Mis pacientes y resultados</h2>
       <div className="doctor-actions">
         <button onClick={() => setTestMode('choose')} className="btn">Comenzar Pruebas</button>
         <button onClick={() => showOfficeResults ? setShowOfficeResults(false) : loadOfficeResults()} className="btn">Pacientes en consultorio</button>
       </div>
-      {showOfficeResults && <div className="office-results-tab"><h3>Resultados de pacientes en consultorio</h3>{officeResults.length === 0 && <p>Aún no hay resultados de consultorio.</p>}{officeResults.map(p => <div key={p.paciente_id} className="office-result-row"><strong>{p.paciente_username}</strong> <span>CI: {p.paciente_ci}</span> <span>Pruebas: {p.preview?.recent_count || 0}</span><button className="btn" onClick={() => openDetail(p.paciente_ci)}>Ver resultados</button></div>)}</div>}
+      {showOfficeResults && <div className="office-results-tab"><h3>Resultados de pacientes en consultorio</h3>{officeResults.length === 0 && <p>Aún no hay resultados de consultorio.</p>}{officeResults.map(p => <div key={p.paciente_id} className="office-result-row"><strong>Consultorio del Dr. {p.doctor_nombre}</strong><span>Paciente: {p.paciente_nombre || p.paciente_username}</span><span>Edad: {p.paciente_edad ? `${p.paciente_edad} años` : 'No registrada'}</span><span>Pruebas: {p.preview?.recent_count || 0}</span><button className="btn" onClick={() => openDetail(p.paciente_ci)}>Ver resultados</button></div>)}</div>}
       <div className="doctor-search">
         <input placeholder="Buscar por nombre o usuario" value={query} onChange={e=>setQuery(e.target.value)} />
         <input placeholder="O buscar por CI" value={ci} onChange={e=>setCi(e.target.value)} />
@@ -171,10 +195,12 @@ export default function DoctorDashboard(){
       </div>
       {loading && <div>Buscando...</div>}
       {error && <div className="error">{error}</div>}
+      {deleteMessage && <div className={deleteMessage.startsWith('Se eliminó') ? 'success' : 'error'} role="status">{deleteMessage}</div>}
       <div className="patients-list">
         {results.map(p=> (
           <div className="patient-card" key={p.paciente_id || p.paciente_username}>
-            <h3>{p.paciente_username || 'Paciente'} {p.paciente_ci ? `- CI: ${p.paciente_ci}` : ''}</h3>
+            <h3>Consultorio del Dr. {p.doctor_nombre || 'Doctor'}</h3>
+            <div className="patient-identity"><strong>Paciente:</strong> {p.paciente_nombre || p.paciente_username || 'Paciente'} <span>Edad: {p.paciente_edad ? `${p.paciente_edad} años` : 'No registrada'}</span></div>
             <div className="patient-stats">
               {p.preview ? (
                 <div>
@@ -208,8 +234,11 @@ export default function DoctorDashboard(){
                 ))
               )}
             </div>
-            <div style={{marginTop:8}}>
+            <div className="patient-actions">
               <button className="btn" onClick={()=> openDetail(p.paciente_ci || p.paciente_username)}>Ver detalle</button>
+              <button className="btn delete-results-btn" onClick={() => deletePatientResults(p)} disabled={deletingPatient === p.paciente_id}>
+                {deletingPatient === p.paciente_id ? 'Eliminando...' : 'Eliminar paciente y resultados'}
+              </button>
             </div>
           </div>
         ))}
@@ -218,7 +247,6 @@ export default function DoctorDashboard(){
         <div className="modal">
           {testMode === 'choose' ? <>
             <h3>¿Quién realizará las pruebas?</h3>
-            <button className="btn" onClick={() => { setTestAge(''); setOfficeError(''); setTestMode('doctor'); }}>Doctor</button>
             <button className="btn" onClick={() => { setTestAge(''); setOfficeError(''); setTestMode('patient'); }}>Paciente en consultorio</button>
             <button className="btn ghost" onClick={() => setTestMode(null)}>Cancelar</button>
           </> : <>

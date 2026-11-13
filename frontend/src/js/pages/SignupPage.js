@@ -149,8 +149,8 @@ export default function SignupPage() {
 
     // Validación de campos requeridos para Profesional
     if (accountType === "professional") {
-      if (!formData.licenseNumber.trim() || !formData.specialty.trim()) {
-        setError("Por favor completa tu Matrícula y Especialidad profesional");
+      if (!formData.licenseNumber.trim() || !formData.specialty.trim() || !formData.institution.trim()) {
+        setError("Por favor completa tu Matrícula, Especialidad y Consultorio o Institución");
         setLoading(false);
         return;
       }
@@ -375,15 +375,17 @@ export default function SignupPage() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="institution">Institución / Centro (Opcional)</label>
+                <label htmlFor="institution">Consultorio o institución</label>
                 <input
                   type="text"
                   id="institution"
                   name="institution"
                   value={formData.institution}
                   onChange={handleChange}
+                  required
                   placeholder="Ej. Centro de Aprendizaje IVI"
                 />
+                {fieldErrors.institution && <div className="field-error">{fieldErrors.institution}</div>}
               </div>
             </div>
           )}

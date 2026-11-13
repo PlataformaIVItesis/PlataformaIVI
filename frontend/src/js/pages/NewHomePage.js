@@ -5,6 +5,13 @@ const logo = `${process.env.PUBLIC_URL}/images/LogoInSF.png`;
 export default function HomePage() {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem("token");
+  let currentUser = null;
+  try {
+    currentUser = JSON.parse(localStorage.getItem("user") || "null");
+  } catch (error) {
+    currentUser = null;
+  }
+  const isDoctor = currentUser?.role === "doctor";
 
   const handleBeginTests = () => {
     if (isLoggedIn) {
@@ -16,7 +23,7 @@ export default function HomePage() {
 
   const handleViewResults = () => {
     if (isLoggedIn) {
-      navigate("/resultados");
+      navigate(isDoctor ? "/doctor" : "/resultados");
     } else {
       navigate("/login");
     }
@@ -36,7 +43,7 @@ export default function HomePage() {
             </button>
             {isLoggedIn && (
               <button className="btn-resultados" onClick={handleViewResults}>
-                Ver Mis Resultados
+                {isDoctor ? "Ver resultados en consultorio" : "Ver Mis Resultados"}
               </button>
             )}
           </div>

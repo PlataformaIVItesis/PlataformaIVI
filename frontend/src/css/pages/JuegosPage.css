@@ -144,7 +144,7 @@
 .syllable-options button:disabled { opacity: .5; }
 
 .letter-field { position: relative; height: 440px; overflow: hidden; border: 3px solid var(--border); border-radius: var(--ivi-radius-md); background: var(--card); background-image: linear-gradient(color-mix(in srgb, var(--border) 35%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--border) 35%, transparent) 1px, transparent 1px); background-size: 40px 40px; }
-.target-badge { position: absolute; z-index: 2; top: 1rem; left: 50%; padding: .55rem 1rem; transform: translateX(-50%); border-radius: 20px; background: var(--primary); color: #fff; }
+.target-badge { display: block; width: fit-content; margin: 0 auto .75rem; padding: .55rem 1rem; border-radius: 20px; background: var(--primary); color: #fff; font-weight: 700; }
 .target-badge strong { color: #fff; font-size: 1.4rem; }
 .target-letter,
 .distractor-letter { position: absolute; padding: .3rem; border: 0; background: transparent; font-size: 5rem; font-weight: 800; cursor: pointer; }
@@ -153,6 +153,9 @@
 .field-overlay { position: absolute; z-index: 3; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: color-mix(in srgb, var(--text) 88%, transparent); color: #fff; }
 .field-overlay p { font-size: 1.1rem; }
 .reset-button { display: block; margin: 1.3rem auto 0; padding: .65rem 1rem; border: 2px solid var(--primary); border-radius: var(--ivi-radius-sm); background: transparent; color: var(--primary); font: inherit; font-weight: 700; cursor: pointer; }
+.save-result-action { margin: 1rem auto; text-align: center; }
+.save-result-button { min-height: 46px; padding: .7rem 1.2rem; border: 0; border-radius: var(--ivi-radius-sm); background: var(--primary); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.save-result-button:disabled { cursor: default; opacity: .75; }
 
 @media (max-width: 760px) {
   .difficulty-filter { align-items: flex-start; flex-direction: column; }

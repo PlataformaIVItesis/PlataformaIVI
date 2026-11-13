@@ -1,4 +1,4 @@
-import { apiUrl } from "../services/api";
+import { apiUrl, getOfficePatient } from "../services/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/pages/PruebaPage.css";
@@ -21,14 +21,16 @@ export default function PruebaAlfabetoPage() {
   const [respuestas, setRespuestas] = useState({});
   const [guardando, setGuardando] = useState(false);
   const [puntaje, setPuntaje] = useState(null);
+  const [errorGuardado, setErrorGuardado] = useState("");
 
   const handleSubmit = async () => {
     const aciertos = PREGUNTAS.filter((pregunta, index) => respuestas[index] === pregunta.correcta).length;
     const resultado = Math.round((aciertos / PREGUNTAS.length) * 100);
     setGuardando(true);
+    setErrorGuardado("");
     try {
       const token = localStorage.getItem("token");
-      const targetUser = JSON.parse(localStorage.getItem("ivi_office_patient") || "null");
+      const targetUser = getOfficePatient();
       const response = await fetch(apiUrl('/resultados/'), {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -40,7 +42,12 @@ export default function PruebaAlfabetoPage() {
           target_user_id: targetUser?.id
         })
       });
+      const data = await response.json().catch(() => ({}));
       if (response.ok) setPuntaje(resultado);
+      else setErrorGuardado(data.error || data.detail || "No se pudo guardar el resultado. Intenta de nuevo.");
+    } catch (error) {
+      console.error("Error al guardar evaluación:", error);
+      setErrorGuardado("No se pudo conectar con el servidor para guardar el resultado.");
     } finally {
       setGuardando(false);
     }
@@ -85,8 +92,9 @@ export default function PruebaAlfabetoPage() {
           ))}
         </div>
         <div className="prueba-actions">
+          {errorGuardado && <div className="error-message" role="alert">{errorGuardado}</div>}
           <button onClick={handleSubmit} disabled={Object.keys(respuestas).length < PREGUNTAS.length || guardando} className="btn-submit">
-            {guardando ? "Guardando..." : "Enviar Respuestas"}
+            {guardando ? "Guardando..." : "Guardar resultados"}
           </button>
         </div>
       </div>

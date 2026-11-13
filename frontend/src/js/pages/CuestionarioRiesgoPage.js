@@ -1,4 +1,4 @@
-import { apiUrl } from "../services/api";
+import { apiUrl, getOfficePatient } from "../services/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/pages/PruebaPage.css";
@@ -92,7 +92,16 @@ export default function CuestionarioRiesgoPage({ tipo }) {
   const [respuestas, setRespuestas] = useState({});
   const [guardando, setGuardando] = useState(false);
   const [resultado, setResultado] = useState(null);
-  const [tiempoInicio] = useState(Date.now());
+  const [errorGuardado, setErrorGuardado] = useState("");
+  const [tiempoInicio, setTiempoInicio] = useState(Date.now());
+
+  const reiniciar = () => {
+    setRespuestas({});
+    setGuardando(false);
+    setResultado(null);
+    setErrorGuardado("");
+    setTiempoInicio(Date.now());
+  };
 
   const responder = (indice, valor) => {
     setRespuestas((actuales) => ({ ...actuales, [indice]: valor }));
@@ -108,9 +117,10 @@ export default function CuestionarioRiesgoPage({ tipo }) {
     }));
 
     setGuardando(true);
+    setErrorGuardado("");
     try {
       const token = localStorage.getItem("token");
-      const paciente = JSON.parse(localStorage.getItem("ivi_office_patient") || "null");
+      const paciente = getOfficePatient();
       const response = await fetch(apiUrl('/resultados/'), {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -133,9 +143,12 @@ export default function CuestionarioRiesgoPage({ tipo }) {
         }),
       });
 
+      const data = await response.json().catch(() => ({}));
       if (response.ok) setResultado({ puntaje, riesgo });
+      else setErrorGuardado(data.error || data.detail || "No se pudo guardar el resultado. Intenta de nuevo.");
     } catch (error) {
       console.error("Error al guardar cuestionario:", error);
+      setErrorGuardado("No se pudo conectar con el servidor para guardar el resultado.");
     } finally {
       setGuardando(false);
     }
@@ -154,6 +167,7 @@ export default function CuestionarioRiesgoPage({ tipo }) {
           {resultado.riesgo.clase === "alto" && <p><strong>Importante:</strong> este resultado es orientativo y no sustituye el diagnóstico oficial de un profesional.</p>}
           <button onClick={() => navigate("/resultados")} className="btn-resultados">Ver mis resultados</button>
           <button onClick={() => navigate("/pruebas")} className="btn-volver">Volver a pruebas</button>
+          <button onClick={reiniciar} className="btn-volver">Reiniciar prueba</button>
         </div>
       </div>
     );
@@ -183,8 +197,11 @@ export default function CuestionarioRiesgoPage({ tipo }) {
           ))}
         </div>
         <div className="prueba-actions">
-          <button onClick={enviar} disabled={Object.keys(respuestas).length < 10 || guardando} className="btn-submit">
-            {guardando ? "Guardando..." : "Enviar cuestionario"}
+          {errorGuardado && <div className="error-message" role="alert">{errorGuardado}</div>}
+          <button type="button" onClick={reiniciar} className="btn-volver">Reiniciar prueba</button>
+          <button type="button" onClick={() => navigate("/pruebas")} className="btn-volver">Volver a pruebas</button>
+          <button onClick={enviar} disabled={Object.keys(respuestas).length < cuestionario.preguntas.length || guardando} className="btn-submit">
+            {guardando ? "Guardando..." : "Guardar resultados"}
           </button>
         </div>
       </div>

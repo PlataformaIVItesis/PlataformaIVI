@@ -2,11 +2,20 @@
 .doctor-page h2{margin:0 0 1.25rem;color:var(--text)}
 .doctor-search{display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap;padding:1rem;background:var(--card);border:1px solid var(--border);border-radius:12px}
 .doctor-search input,.doctor-search select{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.55rem .7rem}
-.patient-card{border:1px solid var(--border);padding:1rem;border-radius:10px;margin-bottom:0.8rem;background:var(--card);color:var(--text)}
-.patient-card h3{color:var(--text)}
-.patient-stats{display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.6rem}
+.patient-card{border:1px solid var(--border);padding:1.25rem;border-radius:14px;margin-bottom:0.9rem;background:var(--card);color:var(--text);text-align:center;box-shadow:var(--ivi-shadow-soft)}
+.patient-card h3{color:var(--text);margin:0 0 1rem;line-height:1.4}
+.patient-identity{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:.45rem 1rem;margin:0 auto 1rem;color:var(--text);font-size:.98rem}
+.patient-identity span{padding:.25rem .7rem;border-radius:999px;background:color-mix(in srgb,var(--primary) 10%,var(--card));font-weight:600}
+.patient-stats{display:flex;flex-direction:column;align-items:center;gap:.65rem;margin-top:.6rem;line-height:1.65}
+.patient-stats>div{width:100%;text-align:center}
+.patient-stats>div>div:last-child{display:grid;gap:.3rem;margin-top:.75rem!important;color:var(--text);font-size:.92rem}
+.patient-card>.btn{margin:1rem auto 0}
 .game-stats{border-left:4px solid var(--primary);padding:0.4rem 0.8rem;background:color-mix(in srgb,var(--card) 82%,var(--bg));border-radius:4px}
 .error{color:#a33;padding:0.5rem;background:color-mix(in srgb,#fee 70%,var(--card));border-radius:6px}
+.success{color:var(--ivi-success-text);padding:.6rem .8rem;margin:.6rem 0;background:color-mix(in srgb,var(--ivi-success) 16%,var(--card));border:1px solid color-mix(in srgb,var(--ivi-success) 45%,var(--border));border-radius:8px;text-align:center}
+.patient-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.delete-results-btn{border-color:#b42318!important;color:#b42318!important;background:color-mix(in srgb,#b42318 7%,var(--card))!important}
+.delete-results-btn:disabled{opacity:.65;cursor:wait}
 .doctor-actions{display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap}
 .office-results-tab{padding:1rem;margin-bottom:1rem;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text)}
 .office-result-row{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;padding:.6rem 0;border-top:1px solid var(--border)}
