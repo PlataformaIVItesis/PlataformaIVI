@@ -185,6 +185,8 @@ def resultados_view(request):
                     resultado_user = User.objects.get(id=target_user_id)
                     if resultado_user.profile.role != 'paciente':
                         return Response({'error': 'El destinatario debe ser un paciente'}, status=status.HTTP_400_BAD_REQUEST)
+                    if user.profile.role == 'doctor' and not Paciente.objects.filter(profile__user=resultado_user, consultorio_doctor=user).exists():
+                        return Response({'error': 'El paciente no pertenece a este consultorio'}, status=status.HTTP_403_FORBIDDEN)
                 except (User.DoesNotExist, Profile.DoesNotExist):
                     return Response({'error': 'Paciente no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -406,7 +408,8 @@ def doctor_view(request):
             paciente = p.user
             doctor = p.paciente.consultorio_doctor
             doctor_name = (doctor.get_full_name().strip() or doctor.username) if doctor else (user.get_full_name().strip() or user.username)
-            res_qs = ResultadoPrueba.objects.filter(paciente__profile__user=paciente).order_by('-fecha_prueba')[:3]
+            patient_results = ResultadoPrueba.objects.filter(paciente__profile__user=paciente)
+            res_qs = patient_results.order_by('-fecha_prueba')[:3]
             last_results = []
             tipo_acc = {}
             for r in res_qs:
@@ -425,12 +428,12 @@ def doctor_view(request):
                 'paciente_id': paciente.id,
                 'paciente_username': paciente.username,
                 'paciente_nombre': paciente.get_full_name().strip() or paciente.username,
-                'paciente_edad': p.age,
+                'paciente_edad': p.paciente.age,
                 'paciente_ci': p.ci,
                 'doctor_nombre': doctor_name,
                 'last_results': last_results,
                 'averages': averages,
-                'recent_count': ResultadoPrueba.objects.filter(paciente__profile__user=paciente).count()
+                'recent_count': patient_results.count()
             })
         return Response(preview, status=status.HTTP_200_OK)
 
@@ -443,7 +446,9 @@ def doctor_view(request):
         patient_record = Paciente.objects.filter(profile__user=paciente).select_related('consultorio_doctor').first()
         doctor = patient_record.consultorio_doctor if patient_record else None
         doctor_name = (doctor.get_full_name().strip() or doctor.username) if doctor else (user.get_full_name().strip() or user.username)
-        res = ResultadoPrueba.objects.filter(paciente__profile__user=paciente)
+        # Limitar los resultados al paciente asignado al doctor actual. El admin conserva
+        # la vista global; los doctores nunca consultan resultados de otro consultorio.
+        res = ResultadoPrueba.objects.filter(paciente=patient_record)
         if tipo_prueba:
             res = res.filter(prueba__codigo=tipo_prueba)
         if date_from_r:
@@ -461,7 +466,7 @@ def doctor_view(request):
                 "paciente_id": paciente.id,
                 "paciente_username": paciente.username,
                 "paciente_nombre": paciente.get_full_name().strip() or paciente.username,
-                "paciente_edad": getattr(paciente.profile, 'age', None),
+                "paciente_edad": patient_record.age if patient_record else None,
                 "paciente_ci": getattr(paciente.profile, 'ci', None),
                 "doctor_nombre": doctor_name,
                 "resultado_id": r.id,
@@ -469,6 +474,8 @@ def doctor_view(request):
                 "tipo_prueba_display": r.get_tipo_prueba_display(),
                 "puntaje": r.puntaje,
                 "fecha_prueba": r.fecha_prueba.isoformat(),
+                "duracion_segundos": r.duracion_segundos,
+                "estado": r.estado,
                 "detalles": r.detalles,
             })
 
@@ -559,7 +566,8 @@ def doctor_consultorio_view(request):
         patient.first_name = name
         patient.save(update_fields=['first_name'])
     profile.is_office_patient = True
-    profile.age = age
+    patient_record.age = age
+    patient_record.save(update_fields=['age'])
     profile.save()
 
     return Response({'patient': {'id': patient.id, 'name': name or patient.first_name, 'ci': profile.ci, 'age': profile.age}}, status=status.HTTP_200_OK)

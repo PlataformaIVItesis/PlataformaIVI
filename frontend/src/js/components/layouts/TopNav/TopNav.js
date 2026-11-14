@@ -83,6 +83,9 @@ export default function TopNav() {
   const isAdmin = parsedUser && parsedUser.role === "admin";
   const isDoctor = parsedUser && parsedUser.role === "doctor";
   const isPatient = parsedUser && parsedUser.role === "patient";
+  const doctorDisplayName = [parsedUser?.first_name, parsedUser?.last_name]
+    .filter(Boolean)
+    .join(" ") || parsedUser?.username || "Médico";
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -206,7 +209,7 @@ export default function TopNav() {
 
               {isDoctor && (
                 <Link to="/doctor" className="nav-link">
-                  Doctor
+                  {doctorDisplayName}
                 </Link>
               )}
 

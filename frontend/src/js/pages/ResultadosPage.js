@@ -1,4 +1,4 @@
-import { apiUrl } from "../services/api";
+import { apiUrl, getOfficePatient } from "../services/api";
 import { useState, useEffect } from "react";
 import "../../css/pages/ResultadosPage.css";
 
@@ -20,7 +20,11 @@ export default function ResultadosPage() {
         return;
       }
 
-      const response = await fetch(apiUrl('/resultados/'), {
+      const officePatient = getOfficePatient();
+      const endpoint = officePatient?.ci
+        ? `/doctor/?ci=${encodeURIComponent(officePatient.ci)}`
+        : '/resultados/';
+      const response = await fetch(apiUrl(endpoint), {
         method: "GET",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -36,7 +40,14 @@ export default function ResultadosPage() {
       }
 
       const data = await response.json();
-      setResultados(data);
+      setResultados(officePatient?.ci
+        ? data.map((result) => ({
+            ...result,
+            id: result.resultado_id,
+            estado: result.estado || "completada",
+            duracion_segundos: result.duracion_segundos || 0,
+          }))
+        : data);
       setError("");
     } catch (err) {
       setError("Error al conectar con el servidor");

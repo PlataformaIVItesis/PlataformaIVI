@@ -160,6 +160,7 @@ export default function PruebaOrtografiaPage() {
     return (
       <div className="prueba-resultado">
         <div className="resultado-container">
+          <button onClick={() => navigate(-1)} className="btn-volver">Volver atrás</button>
           <div className={`resultado-score ${puntaje >= 80 ? 'excelente' : puntaje >= 60 ? 'bueno' : 'necesita-mejorar'}`}>
             <h1>¡Prueba Completada!</h1>
             <div className="score-circle">{puntaje}%</div>
@@ -194,6 +195,7 @@ export default function PruebaOrtografiaPage() {
   return (
     <div className="prueba-ortografia">
       <div className="prueba-container">
+        <button onClick={() => navigate(-1)} className="btn-volver">Volver atrás</button>
         <div className="prueba-header">
           <h1>Prueba de Ortografía</h1>
           <div className="prueba-progress">

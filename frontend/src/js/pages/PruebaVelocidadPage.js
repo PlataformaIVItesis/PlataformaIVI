@@ -84,6 +84,7 @@ export default function PruebaVelocidadPage() {
     return (
       <div className="prueba-resultado">
         <div className="resultado-container">
+        <button onClick={() => navigate(-1)} className="btn-volver">Volver atrás</button>
           <div className={`resultado-score ${desempenio}`}>
             <h1>¡Prueba Completada!</h1>
             <div className="score-circle">{velocidad} <span className="score-unit">ppm</span></div>
@@ -119,6 +120,7 @@ export default function PruebaVelocidadPage() {
   return (
     <div className="prueba-velocidad">
       <div className="prueba-container">
+        <button onClick={() => navigate(-1)} className="btn-volver">Volver atrás</button>
         <div className="prueba-header">
           <h1>Prueba de Velocidad de Lectura</h1>
           <p>Haz clic en cada palabra conforme la lees</p>

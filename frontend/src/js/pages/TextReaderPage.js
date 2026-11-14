@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import FileUploader from "../components/common/FileUploader/FileUploader";
 import ImageFileUploader from "../components/common/ImageFileUploader/ImageFileUploader";
 import AudioGuideButton from "../components/common/AudioGuideButton/AudioGuideButton";
 import "./TextReaderPage.css";
 
 export default function TextReaderPage() {
+  const navigate = useNavigate();
   const [textData, setTextData] = useState(null);
   const [pdfData, setPdfData] = useState(null);
   const [imageData, setImageData] = useState(null);
@@ -41,6 +43,7 @@ export default function TextReaderPage() {
   return (
     <div className="text-reader-page">
       <div className="reader-container">
+        <button type="button" className="btn-volver" onClick={() => navigate(-1)}>Volver atrás</button>
         <h1 className="text-reader-title">Lector de Textos</h1>
         <h2 className="text-reader-subtitle">
           Ingresa tu texto y escúchalo leído en voz alta con controles accesibles.
