@@ -9,6 +9,7 @@ import json
 from datetime import datetime
 import shutil
 from django.db import models
+from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 
 @api_view(['POST'])
@@ -403,7 +404,7 @@ def doctor_view(request):
         preview = []
         perfiles = Profile.objects.filter(role='paciente', user_id__in=assigned_patients.values_list('profile__user_id', flat=True)).select_related('user', 'paciente__consultorio_doctor')
         if office_only:
-            perfiles = perfiles.filter(is_office_patient=True)
+            perfiles = perfiles.filter(paciente__is_office_patient=True)
         for p in perfiles:
             paciente = p.user
             doctor = p.paciente.consultorio_doctor
@@ -505,8 +506,19 @@ def doctor_patient_results_view(request, patient_id):
     if not patient:
         return Response({'error': 'Paciente no encontrado en este consultorio.'}, status=status.HTTP_404_NOT_FOUND)
 
+    patient_user = patient.profile.user
     deleted_count = ResultadoPrueba.objects.filter(paciente=patient).count()
-    patient.profile.user.delete()
+    try:
+        with transaction.atomic():
+            # Remove dependent rows explicitly before deleting the account so older
+            # database constraints cannot leave the patient or results half-deleted.
+            ResultadoPrueba.objects.filter(paciente=patient).delete()
+            patient_user.delete()
+    except Exception as exc:
+        return Response(
+            {'error': f'No se pudo eliminar el paciente y sus resultados: {exc}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
     return Response({
         'message': 'Paciente y resultados eliminados.',
         'deleted_results': deleted_count,
@@ -570,7 +582,7 @@ def doctor_consultorio_view(request):
     patient_record.save(update_fields=['age'])
     profile.save()
 
-    return Response({'patient': {'id': patient.id, 'name': name or patient.first_name, 'ci': profile.ci, 'age': profile.age}}, status=status.HTTP_200_OK)
+    return Response({'patient': {'id': patient.id, 'name': name or patient.first_name, 'ci': profile.ci, 'age': patient_record.age}}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET','POST'])
