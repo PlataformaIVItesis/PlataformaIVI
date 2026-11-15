@@ -138,6 +138,10 @@
   cursor: pointer;
 }
 
+.resultados-list .resultado-toggle {
+  margin-top: 0.65rem;
+}
+
 .resultados-list .results-toggle:hover:not(:disabled) {
   background: var(--stat-card-bg);
   color: var(--stat-card-text);

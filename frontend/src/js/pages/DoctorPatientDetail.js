@@ -9,7 +9,7 @@ export default function DoctorPatientDetail(){
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showResults, setShowResults] = useState(false);
+  const [expandedResults, setExpandedResults] = useState({});
 
   const token = localStorage.getItem('token');
 
@@ -72,23 +72,11 @@ export default function DoctorPatientDetail(){
             </div>
 
             <div className="resultados-list">
-              <div className="resultados-list-heading">
-                <h2>Detalle de Pruebas</h2>
-                <button
-                  type="button"
-                  className="results-toggle"
-                  aria-expanded={showResults}
-                  aria-controls="patient-test-results"
-                  disabled={total === 0}
-                  onClick={() => setShowResults((expanded) => !expanded)}
-                >
-                  {showResults ? 'Ocultar resultados' : `Mostrar resultados (${total})`}
-                </button>
-              </div>
+              <h2>Detalle de Pruebas</h2>
 
-              {total === 0 ? <div className="empty-state"><p>No hay resultados para este paciente.</p></div> : (
-                <div id="patient-test-results" hidden={!showResults}>
-                  {results.map(r => {
+              {total === 0 ? <div className="empty-state"><p>No hay resultados para este paciente.</p></div> : results.map(r => {
+                const resultId = r.resultado_id || r.id;
+                const isExpanded = Boolean(expandedResults[resultId]);
                 const cls = `resultado-item ${scoreClass(r.puntaje||0)}`;
                 const estado = (r.estado || '').toLowerCase();
                 const statusClass = estado === 'completada' ? 'completada' : (estado === 'incompleta' ? 'incompleta' : 'cancelada');
@@ -98,11 +86,20 @@ export default function DoctorPatientDetail(){
                 const progress = r.puntaje || 0;
 
                 return (
-                  <div key={r.resultado_id || r.id} className={cls}>
+                  <div key={resultId} className={cls}>
                     <div className="resultado-header">
                       <div className="resultado-info">
                         <h3>{r.tipo_prueba_display || r.tipo_prueba || 'Prueba'}</h3>
                         <p className="resultado-fecha">{new Date(r.fecha_prueba).toLocaleString()}</p>
+                        <button
+                          type="button"
+                          className="results-toggle resultado-toggle"
+                          aria-expanded={isExpanded}
+                          aria-controls={`patient-test-result-${resultId}`}
+                          onClick={() => setExpandedResults((current) => ({ ...current, [resultId]: !current[resultId] }))}
+                        >
+                          {isExpanded ? 'Ocultar resultados' : 'Mostrar resultados'}
+                        </button>
                       </div>
                       <div className="resultado-score">
                         <div className={`estado ${'completada'}`}>
@@ -112,6 +109,7 @@ export default function DoctorPatientDetail(){
                       </div>
                     </div>
 
+                    <div id={`patient-test-result-${resultId}`} hidden={!isExpanded}>
                     <div className="resultado-details">
                       <div className="detail-item">
                         <div className="label">Duración:</div>
@@ -153,12 +151,11 @@ export default function DoctorPatientDetail(){
                         </div>
                       </div>
                     )}
+                    </div>
 
                   </div>
                 )
-                  })}
-                </div>
-              )}
+              })}
 
             </div>
 
