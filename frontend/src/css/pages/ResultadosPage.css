@@ -39,7 +39,7 @@
 .loading {
   text-align: center;
   padding: 2rem;
-  color: #667eea;
+  color: var(--primary);
   font-size: 1.1rem;
 }
 
@@ -75,23 +75,21 @@
 }
 
 .stat-card {
-  background: var(--stat-card-bg);
-  color: var(--stat-card-text);
+  background: transparent;
+  color: var(--text);
   padding: 1.5rem;
-  border-radius: 8px;
+  border: 0;
+  border-bottom: 2px solid var(--border);
+  border-radius: 0;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
-  transition: transform 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
+  box-shadow: none;
 }
 
 .stat-card h3 {
   margin: 0 0 0.5rem 0;
   font-size: 0.95rem;
-  opacity: 0.9;
+  color: var(--text);
+  opacity: 1;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -100,6 +98,7 @@
   margin: 0;
   font-size: 2.5rem;
   font-weight: bold;
+  color: var(--primary);
 }
 
 .resultados-list h2 {
@@ -216,7 +215,7 @@
 .puntaje {
   font-size: 2rem;
   font-weight: bold;
-  color: #667eea;
+  color: var(--primary);
 }
 
 .resultado-item.alto .puntaje {
@@ -296,7 +295,7 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary);
   transition: width 0.3s ease;
   border-radius: 4px;
 }
@@ -388,27 +387,23 @@
 }
 
 .respuesta-item {
-  background: var(--card);
-  border-radius: 6px;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-left: 4px solid color-mix(in srgb, var(--text) 45%, var(--border));
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--text) 8%, transparent);
-  transition: box-shadow 0.2s ease;
-}
-
-.respuesta-item:hover {
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--text) 14%, transparent);
+  background: transparent;
+  border-radius: 0;
+  padding: 1rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid color-mix(in srgb, var(--text) 45%, var(--border));
+  box-shadow: none;
 }
 
 .respuesta-item.correcta {
   border-left-color: var(--ivi-success);
-  background: color-mix(in srgb, var(--ivi-success) 10%, var(--card));
+  background: transparent;
 }
 
 .respuesta-item.incorrecta {
   border-left-color: var(--ivi-danger);
-  background: color-mix(in srgb, var(--ivi-danger) 10%, var(--card));
+  background: transparent;
 }
 
 .respuesta-header {
@@ -420,7 +415,7 @@
 
 .respuesta-numero {
   font-weight: 600;
-  color: #667eea;
+  color: var(--primary);
   font-size: 0.9rem;
 }
 
@@ -458,10 +453,11 @@
 
 .opcion-seleccionada,
 .opcion-correcta {
-  padding: 0.75rem;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--card) 86%, var(--bg));
-  border: 1px solid var(--border);
+  padding: 0.5rem 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .opcion-seleccionada {

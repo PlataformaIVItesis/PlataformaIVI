@@ -2,6 +2,7 @@ import { apiUrl, getOfficePatient } from "../services/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/pages/PruebaPage.css";
+import "../../css/pages/ResultadosPage.css";
 
 const PREGUNTAS = [
   { pregunta: "Escucha o lee las siguientes opciones. ¿Cuál de ellas es una LETRA?", opciones: ["4", "8", "M", "2"], correcta: 2 }, 

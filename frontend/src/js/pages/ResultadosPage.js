@@ -4,6 +4,7 @@ import "../../css/pages/ResultadosPage.css";
 
 export default function ResultadosPage() {
   const [resultados, setResultados] = useState([]);
+  const [expandedResults, setExpandedResults] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -178,7 +179,9 @@ export default function ResultadosPage() {
 
             <div className="resultados-list">
               <h2>Detalle de Pruebas</h2>
-              {resultados.map((resultado) => (
+              {resultados.map((resultado) => {
+                const isExpanded = Boolean(expandedResults[resultado.id]);
+                return (
                 <div
                   key={resultado.id}
                   className={`resultado-item ${getColorPuntaje(resultado.puntaje, resultado.detalles)}`}
@@ -189,6 +192,15 @@ export default function ResultadosPage() {
                       <p className="resultado-fecha">
                         {formatearFecha(resultado.fecha_prueba)}
                       </p>
+                      <button
+                        type="button"
+                        className="results-toggle resultado-toggle"
+                        aria-expanded={isExpanded}
+                        aria-controls={`patient-result-${resultado.id}`}
+                        onClick={() => setExpandedResults((current) => ({ ...current, [resultado.id]: !current[resultado.id] }))}
+                      >
+                        {isExpanded ? "Ocultar resultados" : "Mostrar resultados"}
+                      </button>
                     </div>
                     <div className="resultado-score">
                       <span className="puntaje">{mostrarPuntaje(resultado)}</span>
@@ -198,6 +210,7 @@ export default function ResultadosPage() {
                     </div>
                   </div>
 
+                  <div id={`patient-result-${resultado.id}`} hidden={!isExpanded}>
                   <div className="resultado-details">
                     {!esCuestionarioRiesgo(resultado) && <div className="detail-item">
                       <span className="label">Duración:</span>
@@ -254,8 +267,10 @@ export default function ResultadosPage() {
                       ></div>
                     </div>
                   </div>
+                  </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
