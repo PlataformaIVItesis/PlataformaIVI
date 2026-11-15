@@ -115,6 +115,7 @@ function AppLayout({ children }) {
           src={`${process.env.PUBLIC_URL}/images/fondo-global-poster.jpg`}
           alt=""
         />
+        <div className="app-background__sparkles" />
       </div>
       <div className="app-content">
         {children}

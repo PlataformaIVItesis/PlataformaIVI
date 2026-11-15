@@ -43,6 +43,7 @@ body {
 
 .app-background::after {
   position: absolute;
+  z-index: 1;
   inset: 0;
   content: "";
   background: color-mix(in srgb, var(--bg) 82%, transparent);
@@ -59,17 +60,67 @@ body {
 }
 
 .app-background__gif {
-  animation: global-background-drift 32s ease-in-out infinite alternate;
+  position: relative;
+  z-index: 0;
+  animation: global-background-drift 14s ease-in-out infinite alternate;
   will-change: transform;
 }
 
 @keyframes global-background-drift {
   from {
-    transform: scale(1.03) translate3d(0, 0, 0);
+    transform: scale(1.01) translate3d(0, 0, 0);
   }
   to {
-    transform: scale(1.1) translate3d(-1%, 1%, 0);
+    transform: scale(1.045) translate3d(-0.5%, 0.5%, 0);
   }
+}
+
+.app-background__sparkles {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.app-background__sparkles::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  opacity: 0.6;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.95));
+  background:
+    linear-gradient(90deg, transparent 40%, rgba(255, 255, 255, 0.95) 50%, transparent 60%) 18% 24% / 22px 2px no-repeat,
+    linear-gradient(0deg, transparent 40%, rgba(255, 255, 255, 0.95) 50%, transparent 60%) 18% 24% / 2px 22px no-repeat,
+    linear-gradient(90deg, transparent 40%, rgba(255, 255, 255, 0.9) 50%, transparent 60%) 43% 69% / 16px 2px no-repeat,
+    linear-gradient(0deg, transparent 40%, rgba(255, 255, 255, 0.9) 50%, transparent 60%) 43% 69% / 2px 16px no-repeat,
+    linear-gradient(90deg, transparent 40%, rgba(255, 255, 255, 0.95) 50%, transparent 60%) 76% 32% / 20px 2px no-repeat,
+    linear-gradient(0deg, transparent 40%, rgba(255, 255, 255, 0.95) 50%, transparent 60%) 76% 32% / 2px 20px no-repeat,
+    radial-gradient(circle at 18% 24%, #fff 0 2px, transparent 3px),
+    radial-gradient(circle at 43% 69%, #fff 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 76% 32%, #fff 0 2px, transparent 3px),
+    radial-gradient(circle at 86% 76%, rgba(255, 255, 255, 0.95) 0 1.5px, transparent 2.5px);
+  animation: sparkle-twinkle 3.8s ease-in-out infinite alternate;
+}
+
+.app-background__sparkles::after {
+  position: absolute;
+  inset: -30% -60%;
+  content: "";
+  opacity: 0;
+  background: linear-gradient(115deg, transparent 46%, rgba(255, 255, 255, 0.16) 50%, transparent 54%);
+  animation: sparkle-sweep 8s ease-in-out infinite;
+}
+
+@keyframes sparkle-twinkle {
+  from { opacity: 0.25; }
+  to { opacity: 0.85; }
+}
+
+@keyframes sparkle-sweep {
+  0%, 48% { opacity: 0; transform: translateX(-12%); }
+  58% { opacity: 0.7; }
+  74%, 100% { opacity: 0; transform: translateX(12%); }
 }
 
 .app-background__poster {
@@ -115,7 +166,11 @@ body {
 
   .app-background__poster {
     display: block;
-    transform: scale(1.03);
+    transform: scale(1.01);
+  }
+
+  .app-background__sparkles {
+    display: none;
   }
 }
 
