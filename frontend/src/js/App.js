@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AccessibilityProvider, AccessibilityContext } from "./context/AccessibilityContext";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 
 // 🏛️ Páginas Públicas / Base
 import LoginPage from "./pages/LoginPage";
@@ -64,6 +64,13 @@ function ProtectedRoute({ children, allowedRoles }) {
 
 function AppLayout({ children }) {
   const { fontSize, spacing, theme, font } = useContext(AccessibilityContext);
+  const backgroundVideoRef = useRef(null);
+
+  useEffect(() => {
+    if (backgroundVideoRef.current) {
+      backgroundVideoRef.current.playbackRate = 0.6;
+    }
+  }, []);
 
   useEffect(() => {
     const fontFamily = FONT_MAP[font] || FONT_MAP.Lexend;
@@ -106,6 +113,7 @@ function AppLayout({ children }) {
     <div className="app-container">
       <div className="app-background" aria-hidden="true">
         <video
+          ref={backgroundVideoRef}
           className="app-background__video"
           autoPlay
           muted
