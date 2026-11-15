@@ -68,7 +68,7 @@ function AppLayout({ children }) {
 
   useEffect(() => {
     if (backgroundVideoRef.current) {
-      backgroundVideoRef.current.playbackRate = 0.1;
+      backgroundVideoRef.current.playbackRate = 0.3;
     }
   }, []);
 
