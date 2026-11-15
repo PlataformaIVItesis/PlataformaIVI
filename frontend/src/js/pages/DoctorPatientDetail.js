@@ -9,6 +9,7 @@ export default function DoctorPatientDetail(){
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showResults, setShowResults] = useState(false);
 
   const token = localStorage.getItem('token');
 
@@ -71,11 +72,23 @@ export default function DoctorPatientDetail(){
             </div>
 
             <div className="resultados-list">
-              <h2>Detalle de Pruebas</h2>
+              <div className="resultados-list-heading">
+                <h2>Detalle de Pruebas</h2>
+                <button
+                  type="button"
+                  className="results-toggle"
+                  aria-expanded={showResults}
+                  aria-controls="patient-test-results"
+                  disabled={total === 0}
+                  onClick={() => setShowResults((expanded) => !expanded)}
+                >
+                  {showResults ? 'Ocultar resultados' : `Mostrar resultados (${total})`}
+                </button>
+              </div>
 
-              {total===0 && <div className="empty-state"><p>No hay resultados para este paciente.</p></div>}
-
-              {results.map(r => {
+              {total === 0 ? <div className="empty-state"><p>No hay resultados para este paciente.</p></div> : (
+                <div id="patient-test-results" hidden={!showResults}>
+                  {results.map(r => {
                 const cls = `resultado-item ${scoreClass(r.puntaje||0)}`;
                 const estado = (r.estado || '').toLowerCase();
                 const statusClass = estado === 'completada' ? 'completada' : (estado === 'incompleta' ? 'incompleta' : 'cancelada');
@@ -143,7 +156,9 @@ export default function DoctorPatientDetail(){
 
                   </div>
                 )
-              })}
+                  })}
+                </div>
+              )}
 
             </div>
 
