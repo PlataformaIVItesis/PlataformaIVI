@@ -56,7 +56,20 @@ body {
   height: 100%;
   object-fit: cover;
   filter: blur(2px);
-  transform: scale(1.03);
+}
+
+.app-background__gif {
+  animation: global-background-drift 32s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes global-background-drift {
+  from {
+    transform: scale(1.03) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(-1%, 1%, 0);
+  }
 }
 
 .app-background__poster {
@@ -96,10 +109,13 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .app-background__gif {
     display: none;
+    animation: none;
+    will-change: auto;
   }
 
   .app-background__poster {
     display: block;
+    transform: scale(1.03);
   }
 }
 
