@@ -19,13 +19,23 @@ const PREGUNTAS = [
 export default function PruebaAlfabetoPage() {
   const navigate = useNavigate();
   const [respuestas, setRespuestas] = useState({});
+  const [tiempoInicio] = useState(Date.now);
   const [guardando, setGuardando] = useState(false);
   const [puntaje, setPuntaje] = useState(null);
+  const [resumen, setResumen] = useState(null);
   const [errorGuardado, setErrorGuardado] = useState("");
 
   const handleSubmit = async () => {
     const aciertos = PREGUNTAS.filter((pregunta, index) => respuestas[index] === pregunta.correcta).length;
     const resultado = Math.round((aciertos / PREGUNTAS.length) * 100);
+    const duracion = Math.max(0, Math.floor((Date.now() - tiempoInicio) / 1000));
+    const respuestasDetalladas = PREGUNTAS.map((pregunta, index) => ({
+      pregunta: pregunta.pregunta,
+      opciones: pregunta.opciones,
+      respuesta_seleccionada: pregunta.opciones[respuestas[index]],
+      respuesta_correcta: pregunta.opciones[pregunta.correcta],
+      es_correcta: respuestas[index] === pregunta.correcta,
+    }));
     setGuardando(true);
     setErrorGuardado("");
     try {
@@ -37,13 +47,22 @@ export default function PruebaAlfabetoPage() {
         body: JSON.stringify({
           tipo_prueba: "alfabeto",
           puntaje: resultado,
-          duracion_segundos: 0,
-          detalles: { total_preguntas: PREGUNTAS.length, respuestas_correctas: aciertos },
+          duracion_segundos: duracion,
+          detalles: {
+            total_preguntas: PREGUNTAS.length,
+            preguntas_respondidas: Object.keys(respuestas).length,
+            correctas: aciertos,
+            incorrectas: PREGUNTAS.length - aciertos,
+            respuestas: respuestasDetalladas,
+          },
           target_user_id: targetUser?.id
         })
       });
       const data = await response.json().catch(() => ({}));
-      if (response.ok) setPuntaje(resultado);
+      if (response.ok) {
+        setPuntaje(resultado);
+        setResumen({ aciertos, duracion, respuestas: respuestasDetalladas });
+      }
       else setErrorGuardado(data.error || data.detail || "No se pudo guardar el resultado. Intenta de nuevo.");
     } catch (error) {
       console.error("Error al guardar evaluación:", error);
@@ -61,6 +80,22 @@ export default function PruebaAlfabetoPage() {
             <h1>¡Filtro completado!</h1>
             <div className="score-circle">{puntaje}%</div>
             <p className="score-text">Resultado del test de conocimiento del alfabeto</p>
+          </div>
+          <div className="resultado-stats">
+            <div className="stat"><span className="stat-label">Respuestas correctas</span><span className="stat-value">{resumen?.aciertos ?? 0} / {PREGUNTAS.length}</span></div>
+            <div className="stat"><span className="stat-label">Tiempo</span><span className="stat-value">{resumen?.duracion ?? 0}s</span></div>
+          </div>
+          <div className="respuestas-section">
+            <h4>Revisión de respuestas</h4>
+            <div className="respuestas-list">
+              {resumen?.respuestas.map((resp, index) => (
+                <div key={index} className={`respuesta-item ${resp.es_correcta ? 'correcta' : 'incorrecta'}`}>
+                  <div className="respuesta-header"><span className="respuesta-numero">Pregunta {index + 1}</span><span className={`respuesta-estado ${resp.es_correcta ? 'correcto' : 'incorrecto'}`}>{resp.es_correcta ? '✓ Correcta' : '✗ Incorrecta'}</span></div>
+                  <p className="respuesta-pregunta">{resp.pregunta}</p>
+                  <div className="respuesta-opciones"><div className="opcion-seleccionada"><strong>Tu respuesta:</strong><p>{resp.respuesta_seleccionada}</p></div>{!resp.es_correcta && <div className="opcion-correcta"><strong>Respuesta correcta:</strong><p>{resp.respuesta_correcta}</p></div>}</div>
+                </div>
+              ))}
+            </div>
           </div>
           <button onClick={() => navigate("/resultados")} className="btn-resultados">Ver mis resultados</button>
           <button onClick={() => navigate("/pruebas")} className="btn-volver">Volver a pruebas</button>

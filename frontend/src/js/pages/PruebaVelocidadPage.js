@@ -41,7 +41,9 @@ export default function PruebaVelocidadPage() {
 
   const handleDetener = async () => {
     setCorriendo(false);
-    const velocidad = calcularVelocidad();
+    const duracionFinal = Math.max(1, Math.floor((Date.now() - tiempoInicio) / 1000));
+    setTiempoTranscurrido(duracionFinal);
+    const velocidad = Math.round(palabrasLeidas / (duracionFinal / 60));
     
     setGuardando(true);
     setErrorGuardado("");
@@ -56,7 +58,7 @@ export default function PruebaVelocidadPage() {
         body: JSON.stringify({
           tipo_prueba: "velocidad",
           puntaje: Math.min(velocidad, 100),
-          duracion_segundos: tiempoTranscurrido,
+          duracion_segundos: duracionFinal,
           detalles: {
             palabras_leidas: palabrasLeidas,
             velocidad_ppm: velocidad

@@ -85,7 +85,7 @@ export default function DoctorPatientDetail(){
                 const progress = r.puntaje || 0;
 
                 return (
-                  <div key={r.id} className={cls}>
+                  <div key={r.resultado_id || r.id} className={cls}>
                     <div className="resultado-header">
                       <div className="resultado-info">
                         <h3>{r.tipo_prueba_display || r.tipo_prueba || 'Prueba'}</h3>
@@ -125,15 +125,15 @@ export default function DoctorPatientDetail(){
                         <h4>Respuestas</h4>
                         <div className="respuestas-list">
                           {detalles.respuestas.map((resp, idx) => (
-                            <div key={idx} className={`respuesta-item ${resp.correcta ? 'correcta' : 'incorrecta'}`}>
+                            <div key={idx} className={`respuesta-item ${resp.es_correcta === true || resp.correcta === true ? 'correcta' : resp.es_correcta === false || resp.correcta === false ? 'incorrecta' : ''}`}>
                               <div className="respuesta-header">
                                 <div className="respuesta-numero">Pregunta {idx+1}</div>
-                                <div className={`respuesta-estado ${resp.correcta ? 'correcto' : 'incorrecto'}`}>{resp.correcta ? 'Correcta' : 'Incorrecta'}</div>
+                                {typeof resp.es_correcta === 'boolean' || typeof resp.correcta === 'boolean' ? <div className={`respuesta-estado ${(resp.es_correcta ?? resp.correcta) ? 'correcto' : 'incorrecto'}`}>{(resp.es_correcta ?? resp.correcta) ? 'Correcta' : 'Incorrecta'}</div> : <div className="respuesta-estado">Registrada</div>}
                               </div>
                               <div className="respuesta-pregunta">{resp.pregunta || ''}</div>
                               <div className="respuesta-opciones">
-                                <div className="opcion-seleccionada">{resp.seleccion || resp.respuesta}</div>
-                                {resp.correcta && <div className="opcion-correcta">Respuesta correcta: {resp.correcta_text || ''}</div>}
+                                <div className="opcion-seleccionada"><strong>Respuesta:</strong> {resp.respuesta_seleccionada ?? resp.seleccion ?? resp.respuesta ?? 'Sin respuesta'}</div>
+                                {(resp.es_correcta === false || resp.correcta === false) && <div className="opcion-correcta"><strong>Respuesta correcta:</strong> {resp.respuesta_correcta || resp.correcta_text || ''}</div>}
                               </div>
                             </div>
                           ))}

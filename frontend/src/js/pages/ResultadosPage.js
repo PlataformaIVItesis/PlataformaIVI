@@ -80,6 +80,8 @@ export default function ResultadosPage() {
       total_preguntas: "Total de preguntas",
       correctas: "Correctas",
       incorrectas: "Incorrectas",
+      respuestas_correctas: "Correctas",
+      respuestas_incorrectas: "Incorrectas",
       palabras_leidas: "Palabras leídas",
       velocidad_ppm: "Velocidad ppm",
       tiempo_por_palabra: "Tiempo por palabra",
@@ -211,25 +213,27 @@ export default function ResultadosPage() {
                     }
                   </div>
 
-                  {!esCuestionarioRiesgo(resultado) && resultado.detalles && resultado.detalles.respuestas && resultado.detalles.respuestas.length > 0 && (
+                  {resultado.detalles && Array.isArray(resultado.detalles.respuestas) && resultado.detalles.respuestas.length > 0 && (
                     <div className="respuestas-section">
-                      <h4>Respuestas Detalladas</h4>
+                      <h4>{esCuestionarioRiesgo(resultado) ? "Respuestas registradas" : "Respuestas detalladas"}</h4>
                       <div className="respuestas-list">
                         {resultado.detalles.respuestas.map((resp, idx) => (
-                          <div key={idx} className={`respuesta-item ${resp.es_correcta ? 'correcta' : 'incorrecta'}`}>
+                          <div key={idx} className={`respuesta-item ${resp.es_correcta === true ? 'correcta' : resp.es_correcta === false ? 'incorrecta' : ''}`}>
                             <div className="respuesta-header">
                               <span className="respuesta-numero">Pregunta {idx + 1}</span>
-                              <span className={`respuesta-estado ${resp.es_correcta ? 'correcto' : 'incorrecto'}`}>
-                                {resp.es_correcta ? '✓ Correcta' : '✗ Incorrecta'}
-                              </span>
+                              {typeof resp.es_correcta === "boolean" ? (
+                                <span className={`respuesta-estado ${resp.es_correcta ? 'correcto' : 'incorrecto'}`}>
+                                  {resp.es_correcta ? '✓ Correcta' : '✗ Incorrecta'}
+                                </span>
+                              ) : <span className="respuesta-estado">Registrada</span>}
                             </div>
                             <p className="respuesta-pregunta">{resp.pregunta}</p>
                             <div className="respuesta-opciones">
                               <div className="opcion-seleccionada">
-                                <strong>Tu respuesta:</strong>
-                                <p>{resp.respuesta_seleccionada}</p>
+                                <strong>{resp.respuesta_seleccionada !== undefined ? "Tu respuesta:" : "Respuesta:"}</strong>
+                                <p>{resp.respuesta_seleccionada ?? resp.respuesta ?? "Sin respuesta"}</p>
                               </div>
-                              {!resp.es_correcta && (
+                              {resp.es_correcta === false && (
                                 <div className="opcion-correcta">
                                   <strong>Respuesta correcta:</strong>
                                   <p>{resp.respuesta_correcta}</p>
