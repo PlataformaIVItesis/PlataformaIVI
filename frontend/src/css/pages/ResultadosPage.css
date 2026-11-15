@@ -75,21 +75,20 @@
 }
 
 .stat-card {
-  background: transparent;
-  color: var(--text);
+  background: var(--stat-card-bg);
+  color: var(--stat-card-text);
   padding: 1.5rem;
-  border: 0;
-  border-bottom: 2px solid var(--border);
-  border-radius: 0;
+  border: 1px solid color-mix(in srgb, var(--stat-card-text) 22%, transparent);
+  border-radius: 8px;
   text-align: center;
-  box-shadow: none;
+  box-shadow: var(--ivi-shadow-soft);
 }
 
 .stat-card h3 {
   margin: 0 0 0.5rem 0;
   font-size: 0.95rem;
-  color: var(--text);
-  opacity: 1;
+  color: var(--stat-card-text);
+  opacity: 0.96;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -98,7 +97,7 @@
   margin: 0;
   font-size: 2.5rem;
   font-weight: bold;
-  color: var(--primary);
+  color: var(--stat-card-text);
 }
 
 .resultados-list h2 {
@@ -387,23 +386,22 @@
 }
 
 .respuesta-item {
-  background: transparent;
-  border-radius: 0;
-  padding: 1rem 0;
-  border: 0;
-  border-bottom: 1px solid var(--border);
-  border-left: 3px solid color-mix(in srgb, var(--text) 45%, var(--border));
+  background: var(--card);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid color-mix(in srgb, var(--text) 45%, var(--border));
   box-shadow: none;
 }
 
 .respuesta-item.correcta {
   border-left-color: var(--ivi-success);
-  background: transparent;
+  background: color-mix(in srgb, var(--ivi-success) 10%, var(--card));
 }
 
 .respuesta-item.incorrecta {
   border-left-color: var(--ivi-danger);
-  background: transparent;
+  background: color-mix(in srgb, var(--ivi-danger) 10%, var(--card));
 }
 
 .respuesta-header {
