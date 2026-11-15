@@ -50,12 +50,17 @@ body {
   backdrop-filter: blur(3px);
 }
 
-.app-background__video {
+.app-background__gif,
+.app-background__poster {
   width: 100%;
   height: 100%;
   object-fit: cover;
   filter: blur(2px);
   transform: scale(1.03);
+}
+
+.app-background__poster {
+  display: none;
 }
 
 .app-content {
@@ -89,8 +94,12 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-background__video {
-    visibility: hidden;
+  .app-background__gif {
+    display: none;
+  }
+
+  .app-background__poster {
+    display: block;
   }
 }
 
