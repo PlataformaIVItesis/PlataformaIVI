@@ -104,9 +104,24 @@ function AppLayout({ children }) {
 
   return (
     <div className="app-container">
-      {children}
-      <TextToSpeechPopup />
-      <ImageOCRReader />
+      <div className="app-background" aria-hidden="true">
+        <video
+          className="app-background__video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          tabIndex={-1}
+        >
+          <source src={`${process.env.PUBLIC_URL}/videos/fondo-global.mp4`} type="video/mp4" />
+        </video>
+      </div>
+      <div className="app-content">
+        {children}
+        <TextToSpeechPopup />
+        <ImageOCRReader />
+      </div>
     </div>
   );
 }

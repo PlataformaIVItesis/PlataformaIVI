@@ -20,11 +20,78 @@ body {
 .App {
   min-height: 100vh;
   text-align: center;
-  background-color: var(--bg);
+  background-color: transparent;
   color: var(--text);
   font-family: var(--app-font-family, inherit);
   font-size: var(--app-font-size, 16px);
   line-height: var(--app-line-height, 1.7);
+}
+
+.app-container {
+  position: relative;
+  isolation: isolate;
+}
+
+.app-background {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--bg);
+}
+
+.app-background::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+.app-background__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(2px);
+  transform: scale(1.03);
+}
+
+.app-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+/* Keep the existing card surfaces intact while letting each page reveal the shared backdrop. */
+#root .app-content .home-page,
+#root .app-content .about-page,
+#root .app-content .consejos-page,
+#root .app-content .senales-page,
+#root .app-content .text-reader-page,
+#root .app-content .document-reader-page,
+#root .app-content .pruebas-page,
+#root .app-content .prueba-lectura,
+#root .app-content .prueba-velocidad,
+#root .app-content .prueba-comprension,
+#root .app-content .prueba-ortografia,
+#root .app-content .prueba-resultado,
+#root .app-content .resultados-page,
+#root .app-content .games-page,
+#root .app-content .game-page,
+#root .app-content .admin-page,
+#root .app-content .doctor-page,
+#root .app-content .login-container,
+#root .app-content .signup-container {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-background__video {
+    visibility: hidden;
+  }
 }
 
 /* =========================
