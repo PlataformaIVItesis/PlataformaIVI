@@ -97,6 +97,8 @@ export default function ResultadosPage() {
       nivel: "Nivel",
       rango_edad: "Rango de edad",
       puntaje_alcanzado: "Puntaje alcanzado",
+      riesgo: "Nivel de riesgo",
+      recomendacion: "Orientación",
     };
 
     if (esCuestionario) {
@@ -117,7 +119,7 @@ export default function ResultadosPage() {
     }
 
     return Object.entries(detalles)
-      .filter(([key]) => key !== "respuestas")
+      .filter(([key]) => key !== "respuestas" && key !== "riesgo_clase")
       .map(([key, value]) => ({
         label: etiquetas[key] || key.replace(/_/g, " "),
         value,
@@ -125,6 +127,9 @@ export default function ResultadosPage() {
   };
 
   const getColorPuntaje = (puntaje, detalles = {}) => {
+    if (detalles.riesgo_clase === "bajo") return "alto";
+    if (detalles.riesgo_clase === "moderado") return "medio";
+    if (detalles.riesgo_clase === "alto") return "bajo";
     if (detalles.puntaje_maximo === 30) {
       if (puntaje >= 21) return "alto";
       if (puntaje >= 11) return "medio";
@@ -137,6 +142,15 @@ export default function ResultadosPage() {
 
   const esCuestionarioRiesgo = (resultado) => resultado.detalles?.puntaje_maximo === 30;
   const mostrarPuntaje = (resultado) => esCuestionarioRiesgo(resultado) ? `${resultado.puntaje}/30` : `${resultado.puntaje}%`;
+  const getClaseRiesgo = (resultado) => {
+    const clase = resultado.detalles?.riesgo_clase;
+    if (["bajo", "moderado", "alto"].includes(clase)) return clase;
+    const riesgo = String(resultado.detalles?.riesgo || "").toLowerCase();
+    if (riesgo.includes("alto")) return "alto";
+    if (riesgo.includes("moderado")) return "moderado";
+    if (riesgo.includes("bajo")) return "bajo";
+    return "";
+  };
 
   return (
     <div className="resultados-page">
@@ -181,6 +195,7 @@ export default function ResultadosPage() {
               <h2>Detalle de Pruebas</h2>
               {resultados.map((resultado) => {
                 const isExpanded = Boolean(expandedResults[resultado.id]);
+                const claseRiesgo = getClaseRiesgo(resultado);
                 return (
                 <div
                   key={resultado.id}
@@ -204,7 +219,7 @@ export default function ResultadosPage() {
                     </div>
                     <div className="resultado-score">
                       <span className="puntaje">{mostrarPuntaje(resultado)}</span>
-                      <span className={`estado ${resultado.estado}`}>
+                      <span className={`estado ${claseRiesgo ? `riesgo-${claseRiesgo}` : resultado.estado}`}>
                         {resultado.detalles?.riesgo || resultado.estado.charAt(0).toUpperCase() + resultado.estado.slice(1)}
                       </span>
                     </div>

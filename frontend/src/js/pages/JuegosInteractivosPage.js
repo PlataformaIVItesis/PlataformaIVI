@@ -5,6 +5,7 @@ import cerebro from "../../images/juegos/cerebro.svg";
 import juego from "../../images/juegos/juego.svg";
 import libros from "../../images/juegos/libros.svg";
 import "../../css/pages/JuegosPage.css";
+import { obtenerRiesgoDesempeno } from "../utils/riesgoDesempeno";
 
 const niveles = [
   { label: "Fácil", detail: "Inicio", className: "easy" },
@@ -25,6 +26,17 @@ const guardarResultadoJuego = async (tipoPrueba, puntaje, duracionSegundos, deta
   const token = localStorage.getItem("token");
   if (!token) throw new Error("Inicia sesión para guardar los resultados.");
 
+  const puntajeNormalizado = Math.max(0, Math.min(100, Math.round(puntaje)));
+  const riesgo = obtenerRiesgoDesempeno(puntajeNormalizado);
+  const niveles = ["Fácil", "Medio", "Difícil"];
+  const detallesConRiesgo = {
+    ...detalles,
+    riesgo: riesgo.nombre,
+    riesgo_clase: riesgo.clase,
+    recomendacion: riesgo.recomendacion,
+    ...(Number.isInteger(detalles.nivel) ? { nivel: niveles[detalles.nivel] } : {}),
+  };
+
   const paciente = getOfficePatient();
   const response = await fetch(apiUrl('/resultados/'), {
     method: "POST",
@@ -34,9 +46,9 @@ const guardarResultadoJuego = async (tipoPrueba, puntaje, duracionSegundos, deta
     },
     body: JSON.stringify({
       tipo_prueba: tipoPrueba,
-      puntaje: Math.max(0, Math.min(100, Math.round(puntaje))),
+      puntaje: puntajeNormalizado,
       duracion_segundos: duracionSegundos,
-      detalles,
+      detalles: detallesConRiesgo,
       target_user_id: paciente?.id,
     }),
   });
@@ -48,13 +60,14 @@ function GuardarResultado({ tipo, puntaje, duracion, detalles }) {
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [error, setError] = useState("");
+  const riesgo = obtenerRiesgoDesempeno(puntaje);
   const guardar = async () => {
     setGuardando(true); setError("");
     try { await guardarResultadoJuego(tipo, puntaje, duracion, detalles); setGuardado(true); }
     catch (err) { setError(err.message || "No se pudo guardar el resultado."); }
     finally { setGuardando(false); }
   };
-  return <div className="save-result-action"><button className="save-result-button" onClick={guardar} disabled={guardando || guardado}>{guardado ? "Resultados guardados" : guardando ? "Guardando..." : "Guardar resultados"}</button>{error && <p className="error-message" role="alert">{error}</p>}</div>;
+  return <div className="save-result-action"><div className={`game-risk-summary risk-${riesgo.clase}`} role="status"><strong>Nivel de riesgo orientativo: {riesgo.nombre}</strong><span>{riesgo.recomendacion}</span><small>Este resultado es orientativo y no constituye un diagnóstico.</small></div><button className="save-result-button" onClick={guardar} disabled={guardando || guardado}>{guardado ? "Resultados guardados" : guardando ? "Guardando..." : "Guardar resultados"}</button>{error && <p className="error-message" role="alert">{error}</p>}</div>;
 }
 
 function Shell({ title, subtitle, image, level, setLevel, age, children, onReset }) {

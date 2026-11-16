@@ -40,6 +40,15 @@ export default function DoctorPatientDetail(){
     return 'bajo';
   }
 
+  const riskClass = (details = {}) => {
+    if (["bajo", "moderado", "alto"].includes(details.riesgo_clase)) return details.riesgo_clase;
+    const risk = String(details.riesgo || "").toLowerCase();
+    if (risk.includes("alto")) return "alto";
+    if (risk.includes("moderado")) return "moderado";
+    if (risk.includes("bajo")) return "bajo";
+    return "";
+  };
+
   const fmtDuration = (s) => {
     if (!s) return '0m 0s';
     const m = Math.floor(s/60); const sec = s%60; return `${m}m ${sec}s`;
@@ -81,6 +90,7 @@ export default function DoctorPatientDetail(){
                 const estado = (r.estado || '').toLowerCase();
                 const statusClass = estado === 'completada' ? 'completada' : (estado === 'incompleta' ? 'incompleta' : 'cancelada');
                 const detalles = r.detalles || {};
+                const claseRiesgo = riskClass(detalles);
                 const preguntasRespondidas = detalles.preguntas_respondidas || (Array.isArray(detalles.respuestas) ? detalles.respuestas.length : (detalles.respondidas || 0));
                 const totalPreguntas = detalles.total_preguntas || detalles.total || 0;
                 const progress = r.puntaje || 0;
@@ -102,9 +112,8 @@ export default function DoctorPatientDetail(){
                         </button>
                       </div>
                       <div className="resultado-score">
-                        <div className={`estado ${'completada'}`}>
-                          <span className={`estado ${statusClass}`}>{estado || 'Completada'}</span>
-                        </div>
+                        <span className={`estado ${statusClass}`}>{estado || 'Completada'}</span>
+                        {detalles.riesgo && <span className={`estado ${claseRiesgo ? `riesgo-${claseRiesgo}` : ''}`}>{detalles.riesgo}</span>}
                         <div className="puntaje">{progress}%</div>
                       </div>
                     </div>
@@ -123,6 +132,10 @@ export default function DoctorPatientDetail(){
                         <div className="label">Total de preguntas:</div>
                         <div className="value">{totalPreguntas}</div>
                       </div>
+                      {detalles.recomendacion && <div className="detail-item">
+                        <div className="label">Orientación:</div>
+                        <div className="value">{detalles.recomendacion}</div>
+                      </div>}
                     </div>
 
                     <div className="resultado-progress">

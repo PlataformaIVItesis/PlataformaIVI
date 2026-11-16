@@ -117,7 +117,7 @@ export default function TopNav() {
               <option value="white">Blanco</option>
               <option value="sepia">Sepia</option>
               <option value="cream">Crema</option>
-              <option value="dark">Oscuro (Dislexia)</option>
+              <option value="dark">Oscuro</option>
             </select>
           </div>
         </div>

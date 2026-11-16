@@ -74,7 +74,6 @@ export default function TopNav() {
   const isAbout = location.pathname === "/about";
   const isConsejos = location.pathname === "/consejos";
   const isLectorText = location.pathname === "/lector-textos";
-  const isPaciente = location.pathname === "/paciente";
 
   // Detectar sesión del usuario
   const storedUser = localStorage.getItem("user");
@@ -82,10 +81,13 @@ export default function TopNav() {
   const isLoggedIn = !!localStorage.getItem("token");
   const isAdmin = parsedUser && parsedUser.role === "admin";
   const isDoctor = parsedUser && parsedUser.role === "doctor";
-  const isPatient = parsedUser && parsedUser.role === "patient";
+  const isPatient = parsedUser && ["patient", "paciente"].includes(parsedUser.role);
   const doctorDisplayName = [parsedUser?.first_name, parsedUser?.last_name]
     .filter(Boolean)
     .join(" ") || parsedUser?.username || "Médico";
+  const patientDisplayName = [parsedUser?.first_name, parsedUser?.last_name]
+    .filter(Boolean)
+    .join(" ") || parsedUser?.username || "Paciente";
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -150,6 +152,10 @@ export default function TopNav() {
           </Link>
 
           {isLoggedIn && (
+            isPatient && <span className="mobile-patient-identity">Paciente - {patientDisplayName}</span>
+          )}
+
+          {isLoggedIn && (
             <button
               className="nav-link logout-btn mobile-logout-btn"
               onClick={handleLogout}
@@ -200,10 +206,10 @@ export default function TopNav() {
             <>
               {isPatient && (
                 <Link 
-                  to="/paciente" 
-                  className={`nav-link ${isPaciente ? 'active' : ''}`}
+                  to="/resultados"
+                  className="nav-link patient-identity-link"
                 >
-                  Mi Perfil
+                  Paciente - {patientDisplayName}
                 </Link>
               )}
 
@@ -339,7 +345,7 @@ export default function TopNav() {
                     <option value="white">Blanco</option>
                     <option value="sepia">Sepia</option>
                     <option value="cream">Crema</option>
-                    <option value="dark">Oscuro (Dislexia)</option>
+                    <option value="dark">Oscuro</option>
                   </select>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import { apiUrl, getOfficePatient } from "../services/api";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/pages/PruebaPage.css";
+import { obtenerRiesgoDesempeno } from "../utils/riesgoDesempeno";
 
 const PALABRAS_VELOCIDAD = [
   "gato", "casa", "libro", "computadora", "montaña", "río", "sol", "nube",
@@ -44,6 +45,7 @@ export default function PruebaVelocidadPage() {
     const duracionFinal = Math.max(1, Math.floor((Date.now() - tiempoInicio) / 1000));
     setTiempoTranscurrido(duracionFinal);
     const velocidad = Math.round(palabrasLeidas / (duracionFinal / 60));
+    const riesgo = obtenerRiesgoDesempeno(Math.min(velocidad, 100));
     
     setGuardando(true);
     setErrorGuardado("");
@@ -61,7 +63,10 @@ export default function PruebaVelocidadPage() {
           duracion_segundos: duracionFinal,
           detalles: {
             palabras_leidas: palabrasLeidas,
-            velocidad_ppm: velocidad
+            velocidad_ppm: velocidad,
+            riesgo: riesgo.nombre,
+            riesgo_clase: riesgo.clase,
+            recomendacion: riesgo.recomendacion
           },
           target_user_id: getOfficePatient()?.id
         }),
@@ -81,6 +86,7 @@ export default function PruebaVelocidadPage() {
 
   if (mostrarResultados) {
     const velocidad = calcularVelocidad();
+    const riesgo = obtenerRiesgoDesempeno(Math.min(velocidad, 100));
     const desempenio = velocidad > 200 ? "excelente" : velocidad > 150 ? "bueno" : "necesita-mejorar";
     
     return (
@@ -93,6 +99,11 @@ export default function PruebaVelocidadPage() {
             <p className="score-text">
               {velocidad > 200 ? "¡Velocidad excelente!" : velocidad > 150 ? "Buena velocidad" : "Sigue practicando"}
             </p>
+          </div>
+          <div className={`game-risk-summary risk-${riesgo.clase}`} role="status">
+            <strong>Nivel de riesgo orientativo: {riesgo.nombre}</strong>
+            <span>{riesgo.recomendacion}</span>
+            <small>Este resultado es orientativo y no constituye un diagnóstico.</small>
           </div>
           <div className="resultado-stats">
             <div className="stat">

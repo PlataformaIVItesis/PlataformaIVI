@@ -143,6 +143,28 @@ body {
   min-height: 100vh;
 }
 
+.game-risk-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--ivi-radius-sm);
+  background: var(--card);
+  color: var(--text);
+  text-align: left;
+}
+
+.game-risk-summary small {
+  color: color-mix(in srgb, var(--text) 72%, var(--bg));
+}
+
+.game-risk-summary.risk-bajo { border-left-color: var(--ivi-success); }
+.game-risk-summary.risk-moderado { border-left-color: #d88600; }
+.game-risk-summary.risk-alto { border-left-color: var(--ivi-danger); }
+
 /* Keep the existing card surfaces intact while letting each page reveal the shared backdrop. */
 #root .app-content .home-page,
 #root .app-content .about-page,

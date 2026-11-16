@@ -2,6 +2,7 @@ import { apiUrl, getOfficePatient } from "../services/api";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../css/pages/PruebaPage.css";
+import { obtenerRiesgoDesempeno } from "../utils/riesgoDesempeno";
 
 const PALABRAS_ORTOGRAFIA = [
   {
@@ -109,6 +110,7 @@ export default function PruebaOrtografiaPage() {
 
   const handleSubmit = async () => {
     const puntaje = calcularPuntaje();
+    const riesgo = obtenerRiesgoDesempeno(puntaje);
     const duracion = Math.floor((Date.now() - tiempoInicio) / 1000);
     
     // Construir array de respuestas con preguntas y opciones
@@ -137,6 +139,9 @@ export default function PruebaOrtografiaPage() {
           detalles: {
             preguntas_respondidas: Object.keys(respuestas).length,
             total_preguntas: PALABRAS_ORTOGRAFIA.length,
+            riesgo: riesgo.nombre,
+            riesgo_clase: riesgo.clase,
+            recomendacion: riesgo.recomendacion,
             respuestas: respuestasDetalladas
           },
           target_user_id: getOfficePatient()?.id
@@ -157,6 +162,7 @@ export default function PruebaOrtografiaPage() {
 
   if (mostrarResultados) {
     const puntaje = calcularPuntaje();
+    const riesgo = obtenerRiesgoDesempeno(puntaje);
     return (
       <div className="prueba-resultado">
         <div className="resultado-container">
@@ -167,6 +173,11 @@ export default function PruebaOrtografiaPage() {
             <p className="score-text">
               {puntaje >= 80 ? "¡Excelente desempeño!" : puntaje >= 60 ? "Buen trabajo" : "Necesitas practicar más"}
             </p>
+          </div>
+          <div className={`game-risk-summary risk-${riesgo.clase}`} role="status">
+            <strong>Nivel de riesgo orientativo: {riesgo.nombre}</strong>
+            <span>{riesgo.recomendacion}</span>
+            <small>Este resultado es orientativo y no constituye un diagnóstico.</small>
           </div>
           <div className="resultado-stats">
             <div className="stat">

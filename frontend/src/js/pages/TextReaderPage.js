@@ -97,7 +97,7 @@ export default function TextReaderPage() {
             {pdfData && (
               <div className="image-reader-result" aria-live="polite">
                 <div className="reader-audio-row">
-                  <AudioGuideButton text={pdfData.texto} rate={pdfRate} label="Escuchar PDF" />
+                  <AudioGuideButton text={pdfData.texto} rate={pdfRate} label="Reproducir documento" />
                   <label htmlFor="pdf-rate">Velocidad: {pdfRate.toFixed(2)}x</label>
                   <input id="pdf-rate" type="range" min="0.5" max="2" step="0.1" value={pdfRate} onChange={(event) => setPdfRate(Number(event.target.value))} />
                 </div>

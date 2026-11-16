@@ -200,6 +200,13 @@
   font-size: 0.95rem;
 }
 
+.patient-identity-link {
+  max-width: 270px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .topnav-menu .nav-link:not(.login-btn):not(.signup-btn):not(.logout-btn):not(.active):hover {
   background: color-mix(in srgb, var(--primary) 8%, transparent);
   border-color: color-mix(in srgb, var(--border) 65%, var(--primary));
@@ -1065,6 +1072,7 @@
 
 .mobile-global-accessibility-trigger { display: none !important; }
 .mobile-logout-btn { display: none !important; }
+.mobile-patient-identity { display: none; }
 
 /* En teléfonos, agrupa los enlaces por función y alinea las filas a la izquierda. */
 @media (max-width: 768px) {
@@ -1134,6 +1142,18 @@
   .primary-links-row .logout-btn { margin-left: 0 !important; }
   .primary-links-row .mobile-logout-btn { display: inline-flex !important; }
 
+  .primary-links-row .mobile-patient-identity {
+    display: inline-block;
+    flex: 0 1 auto;
+    max-width: clamp(90px, 31vw, 155px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text);
+    font-size: clamp(0.6rem, 2.8vw, 0.78rem);
+    font-weight: 700;
+  }
+
   .primary-tools-row .global-accessibility-trigger {
     display: inline-flex !important;
     margin-left: 0 !important;
@@ -1147,6 +1167,7 @@
 
   .desktop-global-accessibility-trigger { display: none !important; }
   .topnav-actions .desktop-logout-btn { display: none !important; }
+  .topnav-actions .patient-identity-link { display: none !important; }
 
   .topnav-actions {
     width: 100%;
@@ -1170,5 +1191,9 @@
     margin-left: 0 !important;
     padding: 0.4rem 0.65rem !important;
     font-size: clamp(0.72rem, 3.4vw, 0.88rem) !important;
+  }
+
+  .topnav-actions .actions-menu > .patient-identity-link {
+    max-width: min(58vw, 270px);
   }
 }

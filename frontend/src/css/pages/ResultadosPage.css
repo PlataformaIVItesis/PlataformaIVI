@@ -251,6 +251,36 @@
   color: #c62828;
 }
 
+.estado.riesgo-bajo {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+
+.estado.riesgo-moderado {
+  background: #ffe0b2;
+  color: #8a4b00;
+}
+
+.estado.riesgo-alto {
+  background: #ffcdd2;
+  color: #b42318;
+}
+
+.estado.riesgo-bajo {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+
+.estado.riesgo-moderado {
+  background: #ffe0b2;
+  color: #8a4b00;
+}
+
+.estado.riesgo-alto {
+  background: #ffcdd2;
+  color: #b42318;
+}
+
 .resultado-details {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
